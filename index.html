@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4ead8">
+<meta name="description" content="Go Cus — konsep layanan ojek dan kurir lokal Pamekasan.">
+<title>Go Cus | Layanan Lokal Pamekasan</title>
+<style>
+:root{--ink:#25201b;--muted:#766b5e;--paper:#fbf6eb;--cream:#f0e2c8;--copper:#b76c35;--rust:#762f2a;--green:#245b48;--line:#e2d3bb;--white:#fffdf8;--shadow:0 10px 28px #3a261014}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #d49a60;outline-offset:2px}.wrap{max-width:1120px;margin:auto;padding:0 18px}.top{position:sticky;top:0;z-index:5;background:#fbf6ebeF;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.nav{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}.mark{width:42px;height:42px;border-radius:14px;background:var(--rust);color:#ffe8bd;display:grid;place-items:center;font-size:22px;font-weight:900;transform:rotate(-4deg)}.brand strong{display:block;letter-spacing:.04em;font-size:16px}.brand small{display:block;color:var(--muted);font-size:11px}.nav-actions{display:flex;gap:7px;flex-wrap:wrap}.navbtn{border:1px solid var(--line);background:var(--white);color:var(--ink);padding:9px 12px;border-radius:12px;font-weight:700;font-size:12px}.navbtn.active{background:var(--rust);color:#fff4df;border-color:var(--rust)}.hero{padding:26px 0 18px}.hero-panel{background:linear-gradient(125deg,#f0dfc0,#fff8eb 56%,#e8d2ad);border:1px solid #dfc9a5;border-radius:26px;padding:25px;position:relative;overflow:hidden;box-shadow:var(--shadow)}.hero-panel:after{content:"✦";position:absolute;right:18px;top:-35px;font-size:180px;color:#a65c3020;transform:rotate(18deg)}.eyebrow{color:var(--rust);font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.hero h1{font-size:clamp(29px,6vw,48px);line-height:1.03;margin:10px 0 12px;max-width:650px;letter-spacing:-.04em}.hero p{color:#5e5144;max-width:540px;line-height:1.65;margin:0}.hero-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px}.btn{border:0;border-radius:13px;padding:12px 16px;font-weight:800;transition:transform .15s}.btn:active{transform:scale(.98)}.primary{background:var(--rust);color:#fff4df}.secondary{background:var(--white);border:1px solid var(--line);color:var(--ink)}.green{background:var(--green);color:white}.tiny{font-size:12px;color:var(--muted);line-height:1.5}.section{padding:18px 0 30px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:4px 0 16px}.section-head h2{margin:0;font-size:23px;letter-spacing:-.03em}.section-head p{margin:5px 0 0;color:var(--muted);font-size:13px}.pill{display:inline-flex;align-items:center;gap:6px;background:#e7eddf;color:#245b48;border-radius:99px;padding:7px 10px;font-size:11px;font-weight:800}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.service{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:18px;text-align:left;min-height:155px;box-shadow:var(--shadow);color:var(--ink)}.service .icon{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;background:#f1dfc7;font-size:23px;margin-bottom:14px}.service:nth-child(2) .icon{background:#f6e0d4}.service h3{margin:0 0 5px;font-size:17px}.service p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}.service .arrow{float:right;color:var(--rust);font-size:20px}.panel{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label{font-size:12px;font-weight:800;color:#5f5144}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#fffdf8;border-radius:12px;padding:12px;color:var(--ink);min-height:45px}.field textarea{min-height:76px;resize:vertical}.estimate{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#f7eedf;border:1px dashed #d7bb8f;padding:14px;border-radius:14px;margin:14px 0}.estimate strong{font-size:21px;color:var(--rust)}.hidden{display:none!important}.view{display:none}.view.active{display:block}.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.stat{padding:15px;background:var(--white);border:1px solid var(--line);border-radius:16px}.stat small{color:var(--muted);font-size:11px}.stat strong{display:block;font-size:24px;margin-top:5px}.order{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px;background:#fffdf8}.order-top{display:flex;justify-content:space-between;gap:10px;align-items:center}.status{font-size:10px;font-weight:900;letter-spacing:.04em;padding:6px 8px;border-radius:99px;background:#f2e4ce;color:#79502d}.route{border-left:2px solid #c8a77a;margin:13px 0 13px 5px;padding-left:14px;color:var(--muted);font-size:13px;line-height:1.9}.order-actions{display:flex;gap:8px;flex-wrap:wrap}.order-actions .btn{padding:9px 12px;font-size:12px}.adminnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.adminnav button{border:1px solid var(--line);border-radius:10px;background:var(--white);padding:9px 11px;font-weight:700;font-size:12px}.adminnav button.active{background:var(--ink);color:white}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:12px;min-width:520px}th,td{text-align:left;padding:12px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:11px}.notice{background:#fff2d9;border:1px solid #e5c88f;border-radius:14px;padding:13px;font-size:12px;line-height:1.6;color:#6c4d20}.footer{padding:24px 0 38px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}.footer strong{color:var(--ink)}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:10;background:var(--ink);color:white;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);max-width:calc(100% - 30px);font-size:13px}.empty{padding:26px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:15px;margin-top:12px}.badge-demo{display:inline-block;background:#f7e2d7;color:#7a352c;padding:5px 8px;border-radius:8px;font-size:10px;font-weight:900}
+@media(min-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero-panel{padding:36px}.service{min-height:170px}.section{padding:22px 0 34px}}
+@media(max-width:560px){.wrap{padding:0 13px}.nav{align-items:flex-start;padding:12px 0;flex-direction:column}.nav-actions{width:100%;display:grid;grid-template-columns:repeat(3,1fr)}.navbtn{padding:9px 4px}.hero{padding-top:15px}.hero-panel{padding:21px;border-radius:21px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.cards{grid-template-columns:1fr 1fr}.cards .stat:last-child{grid-column:1/-1}.section-head{align-items:start;flex-direction:column}.service{padding:14px}.service h3{font-size:15px}}
+</style>
+</head>
+<body>
+<header class="top">
+ <div class="wrap nav">
+  <a class="brand" href="#" aria-label="Go Cus beranda"><span class="mark">P</span><span><strong>GO CUS</strong><small>Maju Bersama Pamekasan</small></span></a>
+  <nav class="nav-actions" aria-label="Navigasi utama">
+   <button class="navbtn active" data-view="customer">Pelanggan</button>
+   <button class="navbtn" data-view="driver">Driver</button>
+   <button class="navbtn" data-view="admin">Admin</button>
+  </nav>
+ </div>
+</header>
+<main class="wrap">
+<section class="hero">
+ <div class="hero-panel">
+  <div class="eyebrow">Layanan lokal • Pamekasan, Madura</div>
+  <h1>Perjalanan dekat,<br>rasa lebih akrab.</h1>
+  <p>Konsep layanan ojek penumpang dan antar barang untuk warga Pamekasan. Mudah dipahami, jelas tarifnya, dan dirancang untuk kebutuhan lokal.</p>
+  <div class="hero-row"><button class="btn primary" id="startBooking">Buat pesanan <span aria-hidden="true">↗</span></button><span class="pill">● Prototipe interaktif</span></div>
+ </div>
+</section>
+<section id="view-customer" class="view active">
+ <section class="section">
+  <div class="section-head"><div><h2>Butuh bantuan perjalanan?</h2><p>Pilih layanan yang Anda perlukan.</p></div><span class="badge-demo">DEMO</span></div>
+  <div class="grid">
+   <button class="service" id="chooseRide"><span class="arrow">↗</span><div class="icon">🛵</div><h3>Ojek penumpang</h3><p>Perjalanan harian di area layanan Pamekasan.</p></button>
+   <button class="service" id="chooseDelivery"><span class="arrow">↗</span><div class="icon">📦</div><h3>Antar barang</h3><p>Kirim dokumen atau paket dengan detail penerima.</p></button>
+  </div>
+ </section>
+ <section class="section" id="bookingSection">
+  <div class="section-head"><div><h2>Formulir pesanan</h2><p>Isi lokasi dan cek estimasi sebelum membuat pesanan.</p></div></div>
+  <div class="panel">
+   <form id="bookingForm">
+    <div class="formgrid">
+     <div class="field"><label for="serviceType">Jenis layanan</label><select id="serviceType"><option value="Ojek Penumpang">Ojek penumpang</option><option value="Antar Barang">Antar barang</option></select></div>
+     <div class="field"><label for="payType">Pembayaran</label><select id="payType"><option>Tunai langsung</option><option>Belum tersedia (demo)</option></select></div>
+     <div class="field"><label for="pickup">Lokasi jemput / ambil</label><input id="pickup" required placeholder="Contoh: Gladak Anyar"></div>
+     <div class="field"><label for="destination">Tujuan / alamat penerima</label><input id="destination" required placeholder="Contoh: Bugih, Pamekasan"></div>
+     <div class="field"><label for="customerName">Nama pemesan</label><input id="customerName" required placeholder="Nama Anda"></div>
+     <div class="field"><label for="customerPhone">Nomor HP</label><input id="customerPhone" inputmode="tel" required placeholder="08xxxxxxxxxx"></div>
+     <div class="field full hidden" id="recipientField"><label for="recipient">Nama penerima barang</label><input id="recipient" placeholder="Nama penerima"></div>
+     <div class="field full"><label for="notes">Catatan (opsional)</label><textarea id="notes" placeholder="Patokan lokasi atau catatan barang"></textarea></div>
+    </div>
+    <div class="estimate"><div><small>Estimasi tarif awal</small><div class="tiny">Simulasi, belum terhubung ke jarak peta.</div></div><strong id="estimatePrice">Rp8.000</strong></div>
+    <button class="btn primary" type="submit" style="width:100%">Buat pesanan demo</button>
+    <p class="tiny">Dengan melanjutkan, Anda memahami ini hanya prototipe. Belum ada driver sungguhan yang menerima order.</p>
+   </form>
+  </div>
+ </section>
+ <section class="section"><div class="section-head"><div><h2>Pesanan saya</h2><p>Riwayat demo tersimpan di browser perangkat ini.</p></div><button class="btn secondary" id="clearOrders" type="button">Hapus riwayat demo</button></div><div id="customerOrders"></div></section>
+</section>
+<section id="view-driver" class="view">
+ <section class="section"><div class="section-head"><div><h2>Ruang mitra driver</h2><p>Contoh tampilan untuk menerima dan menyelesaikan order.</p></div><span class="badge-demo">SIMULASI</span></div>
+  <div class="panel"><div class="order-top"><div><strong>Status mitra</strong><div class="tiny">Aktifkan hanya saat siap menerima order.</div></div><label style="display:flex;align-items:center;gap:8px;font-weight:800"><input type="checkbox" id="driverOnline"> Online</label></div><p class="tiny" id="driverStatusText">Status saat ini: Offline</p></div>
+  <div class="cards" style="margin-top:13px"><div class="stat"><small>Order selesai</small><strong id="driverCompleted">0</strong></div><div class="stat"><small>Penghasilan demo</small><strong id="driverIncome">Rp0</strong></div><div class="stat"><small>Komisi simulasi</small><strong id="driverCommission">Rp0</strong></div></div>
+ </section>
+ <section class="section"><div class="section-head"><div><h2>Daftar pesanan</h2><p>Pesanan yang dibuat dari tab pelanggan akan muncul di sini pada browser yang sama.</p></div></div><div id="driverOrders"></div></section>
+</section>
+<section id="view-admin" class="view">
+ <section class="section"><div class="section-head"><div><h2>Panel pengelola</h2><p>Ringkasan operasional prototipe Go Cus.</p></div><span class="badge-demo">DEMO LOKAL</span></div>
+ <div class="notice">Panel ini belum dilindungi login admin sungguhan. Jangan gunakan data pribadi nyata atau menjalankan transaksi sungguhan sebelum backend dan kontrol akses dipasang.</div>
+ <div class="cards" style="margin-top:14px"><div class="stat"><small>Total pesanan demo</small><strong id="adminTotal">0</strong></div><div class="stat"><small>Menunggu driver</small><strong id="adminPending">0</strong></div><div class="stat"><small>Komisi simulasi</small><strong id="adminCommission">Rp0</strong></div></div>
+ </section>
+ <section class="section"><div class="section-head"><div><h2>Daftar pesanan</h2><p>Periksa status order dan estimasi pembagian pendapatan.</p></div><button class="btn secondary" id="exportOrders">Unduh CSV</button></div><div class="panel tablewrap" id="adminTable"></div></section>
+ <section class="section"><div class="section-head"><div><h2>Pengaturan estimasi tarif</h2><p>Angka ini hanya untuk demo dan belum mencerminkan tarif resmi.</p></div></div><div class="panel"><div class="formgrid"><div class="field"><label for="rideFare">Ojek penumpang (Rp)</label><input id="rideFare" type="number" min="0" step="500" value="8000"></div><div class="field"><label for="deliveryFare">Antar barang (Rp)</label><input id="deliveryFare" type="number" min="0" step="500" value="10000"></div><div class="field"><label for="commissionRate">Komisi simulasi (%)</label><input id="commissionRate" type="number" min="0" max="100" step="1" value="10"></div></div><button class="btn primary" id="saveSettings" style="margin-top:13px">Simpan pengaturan demo</button></div></section>
+</section>
+</main>
+<footer class="footer"><div class="wrap"><strong>Go Cus</strong> · Konsep aplikasi layanan lokal Pamekasan.<br><br>Versi prototipe untuk uji alur. Belum menyediakan layanan transportasi nyata, pelacakan GPS, pembayaran digital, atau akun online lintas perangkat.</div></footer>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const money=n=>'Rp'+Number(n||0).toLocaleString('id-ID');
+const safe=(s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='goCusDemoOrdersV1', SETTINGS='goCusDemoSettingsV1';
+let orders=[];let settings={rideFare:8000,deliveryFare:10000,commissionRate:10};let online=false;
+try{orders=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(orders))orders=[];}catch(e){orders=[]}
+try{settings={...settings,...JSON.parse(localStorage.getItem(SETTINGS)||'{}')};}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(orders));localStorage.setItem(SETTINGS,JSON.stringify(settings));}catch(e){}}
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.add('hidden'),2800)}
+function currentFare(){return $('serviceType').value==='Antar Barang'?Number(settings.deliveryFare):Number(settings.rideFare)}
+function updateEstimate(){$('estimatePrice').textContent=money(currentFare());$('recipientField').classList.toggle('hidden',$('serviceType').value!=='Antar Barang')}
+function switchView(view){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$('view-'+view).classList.add('active');document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));window.scrollTo({top:0,behavior:'smooth'});render()}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
+$('startBooking').onclick=()=>{$('bookingSection').scrollIntoView({behavior:'smooth'});$('pickup').focus()};
+$('chooseRide').onclick=()=>{$('serviceType').value='Ojek Penumpang';updateEstimate();$('bookingSection').scrollIntoView({behavior:'smooth'})};
+$('chooseDelivery').onclick=()=>{$('serviceType').value='Antar Barang';updateEstimate();$('bookingSection').scrollIntoView({behavior:'smooth'})};
+$('serviceType').addEventListener('change',updateEstimate);
+$('bookingForm').addEventListener('submit',e=>{e.preventDefault();const order={id:'PK'+Date.now().toString().slice(-7),type:$('serviceType').value,pay:$('payType').value,pickup:$('pickup').value.trim(),destination:$('destination').value.trim(),name:$('customerName').value.trim(),phone:$('customerPhone').value.trim(),recipient:$('recipient').value.trim(),notes:$('notes').value.trim(),fare:currentFare(),status:'Menunggu driver',created:new Date().toISOString()};if(!order.pickup||!order.destination||!order.name||!order.phone){toast('Lengkapi data yang wajib diisi.');return}orders.unshift(order);save();e.target.reset();updateEstimate();render();toast('Pesanan demo dibuat. Belum dikirim ke driver sungguhan.');});
+$('clearOrders').onclick=()=>{if(confirm('Hapus semua riwayat demo di browser ini?')){orders=[];save();render();toast('Riwayat demo dihapus.')}};
+$('driverOnline').onchange=e=>{online=e.target.checked;$('driverStatusText').textContent='Status saat ini: '+(online?'Online (simulasi)':'Offline');toast(online?'Status driver demo aktif.':'Status driver demo nonaktif.');render()};
+function updateStatus(id,status){const o=orders.find(x=>x.id===id);if(!o)return;o.status=status;save();render();toast('Status demo diperbarui: '+status)}
+function card(o,role){const canAccept=role==='driver'&&o.status==='Menunggu driver';const canFinish=role==='driver'&&['Diterima driver','Dalam perjalanan'].includes(o.status);return `<article class="order"><div class="order-top"><strong>${safe(o.type)} · ${safe(o.id)}</strong><span class="status">${safe(o.status)}</span></div><div class="route">🟢 ${safe(o.pickup)}<br>🔴 ${safe(o.destination)}</div><div class="tiny">Pemesan: ${safe(o.name)} · ${safe(o.phone)}<br>${o.type==='Antar Barang'?'Penerima: '+safe(o.recipient||'Belum diisi')+'<br>':''}Dibuat: ${new Date(o.created).toLocaleString('id-ID')}<br>Catatan: ${safe(o.notes||'-')}</div><div class="order-top" style="margin:12px 0"><span class="tiny">Tarif demo</span><strong>${money(o.fare)}</strong></div><div class="order-actions">${canAccept?`<button class="btn green" data-act="accept" data-id="${safe(o.id)}" ${!online?'disabled title="Aktifkan status online dahulu"':''}>Terima order</button><button class="btn secondary" data-act="reject" data-id="${safe(o.id)}">Tolak</button>`:''}${canFinish?`<button class="btn secondary" data-act="progress" data-id="${safe(o.id)}">Dalam perjalanan</button><button class="btn primary" data-act="finish" data-id="${safe(o.id)}">Selesaikan order</button>`:''}</div></article>`}
+function render(){const customer=$('customerOrders'),driver=$('driverOrders');customer.innerHTML=orders.length?orders.map(o=>card(o,'customer')).join(''):'<div class="empty">Belum ada pesanan. Buat pesanan demo untuk melihat alurnya.</div>';driver.innerHTML=orders.length?orders.map(o=>card(o,'driver')).join(''):'<div class="empty">Pesanan baru akan muncul di sini setelah dibuat dari tab Pelanggan.</div>';
+const completed=orders.filter(o=>o.status==='Selesai');const comm=completed.reduce((s,o)=>s+Math.round(o.fare*settings.commissionRate/100),0);$('driverCompleted').textContent=completed.length;$('driverIncome').textContent=money(completed.reduce((s,o)=>s+o.fare-Math.round(o.fare*settings.commissionRate/100),0));$('driverCommission').textContent=money(comm);$('adminTotal').textContent=orders.length;$('adminPending').textContent=orders.filter(o=>o.status==='Menunggu driver').length;$('adminCommission').textContent=money(comm);
+$('adminTable').innerHTML=orders.length?`<table><thead><tr><th>ID</th><th>Layanan</th><th>Rute</th><th>Tarif</th><th>Status</th><th>Komisi demo</th></tr></thead><tbody>${orders.map(o=>`<tr><td>${safe(o.id)}</td><td>${safe(o.type)}</td><td>${safe(o.pickup)} → ${safe(o.destination)}</td><td>${money(o.fare)}</td><td>${safe(o.status)}</td><td>${money(o.status==='Selesai'?Math.round(o.fare*settings.commissionRate/100):0)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">Belum ada data pesanan.</div>'}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const id=b.dataset.id;switch(b.dataset.act){case'accept':if(!online){toast('Aktifkan status online dahulu.');return}updateStatus(id,'Diterima driver');break;case'reject':updateStatus(id,'Ditolak (demo)');break;case'progress':updateStatus(id,'Dalam perjalanan');break;case'finish':updateStatus(id,'Selesai');break}});
+$('saveSettings').onclick=()=>{settings.rideFare=Math.max(0,Number($('rideFare').value)||0);settings.deliveryFare=Math.max(0,Number($('deliveryFare').value)||0);settings.commissionRate=Math.min(100,Math.max(0,Number($('commissionRate').value)||0));save();updateEstimate();render();toast('Pengaturan demo tersimpan di browser ini.')};
+$('exportOrders').onclick=()=>{const rows=[['ID','Jenis','Pemesan','Telepon','Jemput','Tujuan','Tarif','Status','Waktu'],...orders.map(o=>[o.id,o.type,o.name,o.phone,o.pickup,o.destination,o.fare,o.status,o.created])];const csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}));a.download='go-cus-pesanan-demo.csv';a.click();URL.revokeObjectURL(a.href)};
+$('rideFare').value=settings.rideFare;$('deliveryFare').value=settings.deliveryFare;$('commissionRate').value=settings.commissionRate;updateEstimate();render();
+})();
+</script>
+</body>
+</html>
