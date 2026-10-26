@@ -24,7 +24,7 @@ const ROLE_PUBLIK = [
 
 const STATUS_MENUNGGU = "menunggu-persetujuan";
 
-export async function daftarAkun(email, password, nama, jenisAkun) {
+export async function daftarAkun(email, password, nama, jenisAkun, dataMitra = null) {
   const emailBersih = String(email || "").trim();
   const namaBersih = String(nama || "").trim();
 
@@ -44,6 +44,17 @@ export async function daftarAkun(email, password, nama, jenisAkun) {
     throw new Error("Jenis akun tidak diizinkan.");
   }
 
+  if (jenisAkun === "mitra") {
+    const nomorPlat = String(dataMitra?.nomorPlat || "").trim().toUpperCase();
+    const fotoProfil = String(dataMitra?.fotoProfil || "");
+    if (nomorPlat.replace(/\\s/g, "").length < 4 || nomorPlat.length > 12) {
+      throw new Error("Nomor plat kendaraan mitra wajib diisi dengan benar.");
+    }
+    if (!fotoProfil.startsWith("data:image/jpeg;base64,") || fotoProfil.length > 400000) {
+      throw new Error("Foto profil mitra wajib berupa gambar terkompresi.");
+    }
+  }
+
   const kredensial = await createUserWithEmailAndPassword(
     auth,
     emailBersih,
@@ -51,13 +62,20 @@ export async function daftarAkun(email, password, nama, jenisAkun) {
   );
 
   try {
-    await setDoc(doc(db, "users", kredensial.user.uid), {
+    const profilBaru = {
       nama: namaBersih,
       email: kredensial.user.email,
       role: jenisAkun,
       status: STATUS_MENUNGGU,
       dibuatPada: serverTimestamp()
-    });
+    };
+
+    if (jenisAkun === "mitra") {
+      profilBaru.nomorPlat = String(dataMitra.nomorPlat).trim().toUpperCase();
+      profilBaru.fotoProfil = dataMitra.fotoProfil;
+    }
+
+    await setDoc(doc(db, "users", kredensial.user.uid), profilBaru);
 
     await sendEmailVerification(kredensial.user);
   } catch (error) {
