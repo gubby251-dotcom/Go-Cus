@@ -275,7 +275,7 @@ $('rideFare').value=settings.rideFare;$('deliveryFare').value=settings.deliveryF
 </script>
 
 <script type="module">
-import { daftarAkun, loginAkun, logoutAkun, ambilStatusAkun, pantauLogin, pulihkanProfilAkun, kirimUlangVerifikasi } from "./firebase-auth.js";
+import { daftarAkun, loginAkun, logoutAkun, ambilStatusAkun, pantauLogin, pantauStatusAkun } from "./firebase-auth.js";
 
 const backdrop = document.createElement("div");
 backdrop.className = "gocus-auth-backdrop";
@@ -418,7 +418,7 @@ $auth("gocusRegisterBtn").addEventListener("click", async () => {
   const email = $auth("gocusAuthEmail").value.trim();
   const password = $auth("gocusAuthPassword").value;
   const role = $auth("gocusAuthRole").value;
-  const nomorPlat = plateInput.value.trim().toUpperCase().replace(/\s+/g, " ");
+  const nomorPlat = plateInput.value.trim().toUpperCase().replace(/\\s+/g, " ");
   if (!nama || !email || password.length < 6) {
     message("Isi nama, email yang valid, dan kata sandi minimal 6 karakter.", true);
     return;
@@ -461,29 +461,11 @@ $auth("gocusLoginBtn").addEventListener("click", async () => {
   message("Memeriksa akun…");
   try {
     await loginAkun(email, password);
-    let profil = await ambilStatusAkun();
-
+    const profil = await ambilStatusAkun();
     if (!profil.role) {
-      const nama = $auth("gocusAuthName").value.trim();
-      const role = $auth("gocusAuthRole").value;
-      const nomorPlat = plateInput.value.trim().toUpperCase().replace(/\s+/g, " ");
-      const dataMitra = role === "mitra" ? { nomorPlat, fotoProfil: mitraPhotoData } : null;
-      const hasilPemulihan = await pulihkanProfilAkun(nama, role, dataMitra);
-      profil = await ambilStatusAkun();
-      if (hasilPemulihan.emailDikirim) {
-        message("Profil berhasil dipulihkan. Email verifikasi dikirim ulang. Periksa Kotak Masuk dan Spam.");
-        return;
-      }
-    }
-
-    if (!profil.emailTerverifikasi) {
-      try {
-        await kirimUlangVerifikasi();
-        message("Akun ditemukan. Permintaan email verifikasi dikirim ulang. Periksa Kotak Masuk dan Spam.");
-      } catch (verifyError) {
-        console.error("GO CUS resend verification:", verifyError);
-        message("Profil akun tersedia, tetapi email verifikasi belum terkirim. Coba lagi beberapa saat. " + authError(verifyError), true);
-      }
+      message("Login berhasil, tetapi profil akun belum tersedia. Hubungi pengelola.", true);
+    } else if (!profil.emailTerverifikasi) {
+      message("Login berhasil. Silakan verifikasi email Anda, lalu masuk kembali.");
     } else if (profil.status !== "disetujui") {
       message("Akun berhasil masuk, tetapi masih menunggu persetujuan Admin.");
     } else {
@@ -502,18 +484,31 @@ $auth("gocusLogoutBtn").addEventListener("click", async () => {
   catch (error) { message(authError(error), true); }
 });
 
-pantauLogin(async user => {
+let hentikanPantauanStatus = null;
+pantauLogin(user => {
   $auth("gocusLogoutBtn").hidden = !user;
-  if (!user) return;
-  try {
-    const profil = await ambilStatusAkun();
-    if (profil.status !== "disetujui") {
-      // Keep account state visible only in the account dialog; no privileged UI is opened.
-      message("Status akun: " + profil.status + ".");
-    }
-  } catch (error) {
-    console.warn("GO CUS account state:", error);
+  if (hentikanPantauanStatus) {
+    hentikanPantauanStatus();
+    hentikanPantauanStatus = null;
   }
+  if (!user) return;
+
+  // Firebase mempertahankan sesi login. Status persetujuan dipantau realtime,
+  // jadi pengguna tidak perlu mengisi email/kata sandi lagi setelah Admin setuju.
+  hentikanPantauanStatus = pantauStatusAkun(profil => {
+    if (profil.status === "disetujui" && profil.emailTerverifikasi) {
+      message("Akun telah disetujui Admin. Sesi tetap aktif; Anda tidak perlu masuk kembali.");
+      closeModal();
+    } else if (profil.status === "disetujui" && !profil.emailTerverifikasi) {
+      message("Akun disetujui Admin, tetapi email belum terverifikasi. Verifikasi email terlebih dahulu.");
+    } else if (profil.status === "menunggu-persetujuan") {
+      message("Akun berhasil masuk, masih menunggu persetujuan Admin. Halaman akan memperbarui status otomatis.");
+    } else if (profil.status === "profil-belum-tersedia") {
+      message("Akun login, tetapi profil belum tersedia. Hubungi pengelola.", true);
+    }
+  }, error => {
+    console.warn("GO CUS account status listener:", error);
+  });
 });
 </script>
 </body></html>
