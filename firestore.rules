@@ -35,7 +35,7 @@ service cloud.firestore {
       allow create: if akunSaya(uid)
         && request.resource.data.keys().hasOnly([
           'nama', 'email', 'role', 'status', 'dibuatPada',
-          'nomorPlat', 'fotoProfil'
+          'nomorPlat', 'fotoProfil', 'nomorHp', 'alamat'
         ])
         && request.resource.data.keys().hasAll([
           'nama', 'email', 'role', 'status', 'dibuatPada'
@@ -68,8 +68,10 @@ service cloud.firestore {
         || (
           akunSaya(uid)
           && request.resource.data.diff(resource.data)
-            .affectedKeys().hasOnly(['nama'])
+            .affectedKeys().hasOnly(['nama', 'nomorHp', 'alamat', 'diperbaruiPada'])
           && request.resource.data.nama is string
+          && (!('nomorHp' in request.resource.data) || request.resource.data.nomorHp is string)
+          && (!('alamat' in request.resource.data) || request.resource.data.alamat is string)
         );
 
       allow delete: if admin();
