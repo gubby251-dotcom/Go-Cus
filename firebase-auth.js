@@ -139,6 +139,10 @@ export async function ambilStatusAkun() {
     uid: user.uid,
     email: user.email,
     nama: profil.nama || "",
+    nomorHp: profil.nomorHp || "",
+    alamat: profil.alamat || "",
+    nomorPlat: profil.nomorPlat || "",
+    fotoProfil: profil.fotoProfil || "",
     role: profil.role || null,
     status: profil.status || STATUS_MENUNGGU,
     emailTerverifikasi: user.emailVerified
@@ -173,6 +177,10 @@ export function pantauStatusAkun(callback, onError = () => {}) {
         uid: user.uid,
         email: user.email,
         nama: profil.nama || "",
+        nomorHp: profil.nomorHp || "",
+        alamat: profil.alamat || "",
+        nomorPlat: profil.nomorPlat || "",
+        fotoProfil: profil.fotoProfil || "",
         role: profil.role || null,
         status: profil.status || STATUS_MENUNGGU,
         emailTerverifikasi: user.emailVerified
@@ -180,4 +188,20 @@ export function pantauStatusAkun(callback, onError = () => {}) {
     },
     onError
   );
+}
+
+// Memperbarui data kontak profil tanpa mengubah role atau status persetujuan.
+export async function perbaruiProfilSaya(data) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Silakan login terlebih dahulu.");
+  const nama = String(data?.nama || "").trim();
+  const nomorHp = String(data?.nomorHp || "").trim();
+  const alamat = String(data?.alamat || "").trim();
+  if (!nama) throw new Error("Nama wajib diisi.");
+  if (!nomorHp) throw new Error("Nomor HP wajib diisi.");
+  if (!alamat) throw new Error("Alamat wajib diisi.");
+  await setDoc(doc(db, "users", user.uid), {
+    nama, nomorHp, alamat, diperbaruiPada: serverTimestamp()
+  }, { merge: true });
+  return await ambilStatusAkun();
 }
