@@ -4,10 +4,11 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "ISI_API_KEY_FIREBASE",
+  apiKey: "AIzaSyBLPVIyRzlQQsfDeU3VM17C75CW96GwUzc",
   authDomain: "go-cus.firebaseapp.com",
   projectId: "go-cus",
-  appId: "ISI_APP_ID_FIREBASE"
+  appId: "1:838754374714:web:5b0ebaecbb8d817de75103"
+};
 };
 
 const app = initializeApp(firebaseConfig);
