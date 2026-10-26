@@ -56,7 +56,7 @@ export async function daftarAkun(email, password, nama, jenisAkun, dataMitra = n
   if (jenisAkun === "mitra") {
     const nomorPlat = String(dataMitra?.nomorPlat || "").trim().toUpperCase();
     const fotoProfil = String(dataMitra?.fotoProfil || "");
-    if (nomorPlat.replace(/\\s/g, "").length < 4 || nomorPlat.length > 12) {
+    if (nomorPlat.replace(/\s/g, "").length < 4 || nomorPlat.length > 12) {
       throw new Error("Nomor plat kendaraan mitra wajib diisi dengan benar.");
     }
     if (!fotoProfil.startsWith("data:image/jpeg;base64,") || fotoProfil.length > 400000) {
