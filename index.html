@@ -302,7 +302,7 @@ backdrop.innerHTML = `
         <label for="gocusMitraPlate">Nomor plat kendaraan asli (wajib untuk Mitra)</label>
         <input id="gocusMitraPlate" autocomplete="off" maxlength="12" placeholder="Contoh: M 1234 AB">
         <label for="gocusMitraPhoto">Foto profil asli (wajib untuk Mitra)</label>
-        <input id="gocusMitraPhoto" type="file" accept="image/jpeg,image/png,image/webp" capture="user">
+        <input id="gocusMitraPhoto" type="file" accept="image/*">
         <img id="gocusMitraPhotoPreview" alt="Pratinjau foto profil mitra" hidden style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin-top:8px;border:1px solid var(--line)">
         <small style="display:block;color:var(--muted);margin:6px 0 12px">Foto dikompresi sebelum disimpan. Tidak perlu foto plat atau KTP.</small>
       </div>
