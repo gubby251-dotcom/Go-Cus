@@ -324,11 +324,11 @@ backdrop.innerHTML = `
         <img id="gocusProfilePhoto" alt="Foto profil" hidden style="width:88px;height:88px;object-fit:cover;border-radius:50%;border:1px solid var(--line)">
         <div><h3 id="gocusProfileName" style="margin:0 0 4px">Profil GO CUS</h3><p id="gocusProfileRole" style="margin:0;color:var(--muted)"></p><p id="gocusProfileStatus" style="margin:4px 0 0"></p></div>
       </div>
-      <details class="gocus-profile-detail"><summary>Nomor HP</summary><label for="gocusProfilePhone">Nomor HP</label><input id="gocusProfilePhone" inputmode="tel" placeholder="08xxxxxxxxxx"></details>
-      <details class="gocus-profile-detail"><summary>Alamat</summary><label for="gocusProfileAddress">Alamat</label><textarea id="gocusProfileAddress" rows="2" placeholder="Alamat tempat tinggal"></textarea></details>
+      <details class="gocus-profile-detail"><summary>Nomor HP</summary><label for="gocusProfilePhone">Nomor HP</label><input id="gocusProfilePhone" inputmode="tel" placeholder="08xxxxxxxxxx" disabled></details>
+      <details class="gocus-profile-detail"><summary>Alamat</summary><label for="gocusProfileAddress">Alamat</label><textarea id="gocusProfileAddress" rows="2" placeholder="Alamat tempat tinggal" disabled></textarea></details>
       <details class="gocus-profile-detail" id="gocusProfilePlateWrap" hidden><summary>Kendaraan</summary><label for="gocusProfilePlate">Nomor plat kendaraan</label><input id="gocusProfilePlate" readonly></details>
       <details class="gocus-profile-detail"><summary>Email akun</summary><label for="gocusProfileEmail">Email akun</label><input id="gocusProfileEmail" readonly></details>
-      <button class="btn primary" type="button" id="gocusProfileSave">Edit / Simpan Profil</button>
+      <button class="btn primary" type="button" id="gocusProfileSave">Edit Profil</button>
       <button class="btn secondary" type="button" id="gocusProfileLogout">Keluar Akun</button>
     </section>
     <div class="gocus-auth-actions" id="gocusAuthActions">
@@ -372,6 +372,10 @@ window.addEventListener("gocus:account", async () => {
   } catch (_) {}
 });
 function tampilkanProfilAkun(profil) {
+  modeEditProfil = false;
+  $auth("gocusProfilePhone").disabled = true;
+  $auth("gocusProfileAddress").disabled = true;
+  $auth("gocusProfileSave").textContent = "Edit Profil";
   $auth("gocusAuthFields").hidden = true;
   $auth("gocusAuthActions").hidden = true;
   $auth("gocusAuthModeActions").hidden = true;
@@ -404,15 +408,30 @@ $auth("gocusProfileLogout").addEventListener("click", async () => {
     message("Anda sudah keluar.");
   } catch (error) { message(authError(error), true); }
 });
+let modeEditProfil = false;
 $auth("gocusProfileSave").addEventListener("click", async () => {
-  const btn = $auth("gocusProfileSave"); btn.disabled = true;
+  const btn = $auth("gocusProfileSave");
+  if (!modeEditProfil) {
+    modeEditProfil = true;
+    $auth("gocusProfilePhone").disabled = false;
+    $auth("gocusProfileAddress").disabled = false;
+    btn.textContent = "Simpan Profil";
+    message("Ubah nomor HP dan alamat, lalu tekan Simpan Profil.");
+    return;
+  }
+  btn.disabled = true;
   try {
     const profil = await perbaruiProfilSaya({
       nama: $auth("gocusProfileName").textContent,
       nomorHp: $auth("gocusProfilePhone").value,
       alamat: $auth("gocusProfileAddress").value
     });
-    tampilkanProfilAkun(profil); message("Profil berhasil disimpan.");
+    modeEditProfil = false;
+    $auth("gocusProfilePhone").disabled = true;
+    $auth("gocusProfileAddress").disabled = true;
+    btn.textContent = "Edit Profil";
+    tampilkanProfilAkun(profil);
+    message("Profil berhasil disimpan.");
   } catch (error) { message(authError(error), true); }
   finally { btn.disabled = false; }
 });
@@ -584,6 +603,25 @@ $auth("gocusLogoutBtn").addEventListener("click", async () => {
   catch (error) { message(authError(error), true); }
 });
 
+function terapkanPeranAkun(profil) {
+  const role = profil?.role;
+  const nav = document.getElementById("gocusRoleNav");
+  const disetujui = profil?.status === "disetujui" && profil?.emailTerverifikasi === true;
+  if (!disetujui || !["pelanggan", "mitra", "pemilik-warung"].includes(role)) {
+    gocusRoleAktif = null;
+    if (nav) { nav.textContent = "Pelanggan"; nav.dataset.view = "customer"; }
+    switchView("customer");
+    return;
+  }
+  gocusRoleAktif = role;
+  const view = role === "mitra" ? "driver" : role === "pemilik-warung" ? "owner" : "customer";
+  if (nav) {
+    nav.textContent = role === "mitra" ? "Mitra" : role === "pemilik-warung" ? "Pemilik Warung" : "Pelanggan";
+    nav.dataset.view = view;
+  }
+  switchView(view);
+}
+
 let hentikanPantauanStatus = null;
 pantauLogin(user => {
   $auth("gocusLogoutBtn").hidden = !user;
@@ -591,30 +629,28 @@ pantauLogin(user => {
     hentikanPantauanStatus();
     hentikanPantauanStatus = null;
   }
-  if (!user) return;
-
-  // Firebase mempertahankan sesi login. Status persetujuan dipantau realtime,
-  // jadi pengguna tidak perlu mengisi email/kata sandi lagi setelah Admin setuju.
+  if (!user) {
+    gocusRoleAktif = null;
+    const nav = document.getElementById("gocusRoleNav");
+    if (nav) { nav.textContent = "Pelanggan"; nav.dataset.view = "customer"; }
+    switchView("customer");
+    return;
+  }
+  // Pulihkan peran dan dashboard dari Firestore setiap sesi dipulihkan,
+  // termasuk setelah refresh atau browser dibuka kembali.
   hentikanPantauanStatus = pantauStatusAkun(profil => {
+    terapkanPeranAkun(profil);
     if (profil.status === "disetujui" && profil.emailTerverifikasi) {
-      message("Akun telah disetujui Admin. Sesi tetap aktif; Anda tidak perlu masuk kembali.");
-      closeModal();
-      gocusRoleAktif = profil.role;
-  const nav = document.getElementById("gocusRoleNav");
-  if (nav) { nav.textContent = profil.role === "mitra" ? "Mitra" : profil.role === "pemilik-warung" ? "Pemilik Warung" : "Pelanggan"; nav.dataset.view = profil.role === "mitra" ? "driver" : profil.role === "pemilik-warung" ? "owner" : "customer"; }
-  switchView(profil.role === "mitra" ? "driver" : profil.role === "pemilik-warung" ? "owner" : "customer");
-  tampilkanProfilAkun(profil);
-  window.dispatchEvent(new CustomEvent("gocus:account-approved", { detail: { role: profil.role } }));
+      tampilkanProfilAkun(profil);
+      window.dispatchEvent(new CustomEvent("gocus:account-approved", { detail: { role: profil.role } }));
     } else if (profil.status === "disetujui" && !profil.emailTerverifikasi) {
       message("Akun disetujui Admin, tetapi email belum terverifikasi. Verifikasi email terlebih dahulu.");
     } else if (profil.status === "menunggu-persetujuan") {
-      message("Akun berhasil masuk, masih menunggu persetujuan Admin. Halaman akan memperbarui status otomatis.");
+      message("Akun berhasil masuk, masih menunggu persetujuan Admin.");
     } else if (profil.status === "profil-belum-tersedia") {
       message("Akun login, tetapi profil belum tersedia. Hubungi pengelola.", true);
     }
-  }, error => {
-    console.warn("GO CUS account status listener:", error);
-  });
+  }, error => console.warn("GO CUS account status listener:", error));
 });
 </script>
 </body></html>
