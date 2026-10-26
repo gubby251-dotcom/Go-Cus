@@ -3,7 +3,8 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import { auth, db } from "./firebase-config.js";
@@ -15,24 +16,32 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-const ROLE_DIIZINKAN = [
+const ROLE_PUBLIK = [
   "pelanggan",
   "pemilik-warung",
   "mitra"
 ];
 
-// Mendaftarkan akun baru.
-// Akun belum dapat memakai fitur khusus sampai disetujui.
+const STATUS_MENUNGGU = "menunggu-persetujuan";
+
 export async function daftarAkun(email, password, nama, jenisAkun) {
-  const namaBersih = String(nama || "").trim();
   const emailBersih = String(email || "").trim();
+  const namaBersih = String(nama || "").trim();
+
+  if (!emailBersih || !emailBersih.includes("@")) {
+    throw new Error("Alamat email tidak valid.");
+  }
+
+  if (String(password || "").length < 6) {
+    throw new Error("Kata sandi minimal 6 karakter.");
+  }
 
   if (!namaBersih) {
     throw new Error("Nama wajib diisi.");
   }
 
-  if (!ROLE_DIIZINKAN.includes(jenisAkun)) {
-    throw new Error("Jenis akun tidak valid.");
+  if (!ROLE_PUBLIK.includes(jenisAkun)) {
+    throw new Error("Jenis akun tidak diizinkan.");
   }
 
   const kredensial = await createUserWithEmailAndPassword(
@@ -46,22 +55,24 @@ export async function daftarAkun(email, password, nama, jenisAkun) {
       nama: namaBersih,
       email: kredensial.user.email,
       role: jenisAkun,
-      status: "menunggu-persetujuan",
+      status: STATUS_MENUNGGU,
       dibuatPada: serverTimestamp()
     });
+
+    await sendEmailVerification(kredensial.user);
   } catch (error) {
-    // Jika profil gagal disimpan, akun Auth sudah terbuat.
-    // Jangan menghapus akun secara otomatis.
+    console.error("Pendaftaran/profil:", error);
+
     throw new Error(
-      "Akun berhasil dibuat, tetapi profil gagal disimpan. " +
-      "Periksa Firestore Rules sebelum mencoba kembali."
+      "Akun Auth telah dibuat, tetapi profil atau verifikasi email " +
+      "belum selesai. Jangan mendaftar ulang dengan email yang sama. " +
+      "Periksa Firestore Rules dan status akun."
     );
   }
 
   return kredensial.user;
 }
 
-// Login email dan password.
 export async function loginAkun(email, password) {
   const kredensial = await signInWithEmailAndPassword(
     auth,
@@ -72,7 +83,6 @@ export async function loginAkun(email, password) {
   return kredensial.user;
 }
 
-// Membaca profil dan status akun setelah login.
 export async function ambilStatusAkun() {
   const user = auth.currentUser;
 
@@ -86,7 +96,9 @@ export async function ambilStatusAkun() {
     return {
       uid: user.uid,
       email: user.email,
-      status: "profil-belum-tersedia"
+      role: null,
+      status: "profil-belum-tersedia",
+      emailTerverifikasi: user.emailVerified
     };
   }
 
@@ -96,17 +108,16 @@ export async function ambilStatusAkun() {
     uid: user.uid,
     email: user.email,
     nama: profil.nama || "",
-    role: profil.role || "",
-    status: profil.status || "menunggu-persetujuan"
+    role: profil.role || null,
+    status: profil.status || STATUS_MENUNGGU,
+    emailTerverifikasi: user.emailVerified
   };
 }
 
-// Logout.
 export async function logoutAkun() {
   await signOut(auth);
 }
 
-// Pantau login dan logout.
 export function pantauLogin(callback) {
   return onAuthStateChanged(auth, callback);
 }
