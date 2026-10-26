@@ -11,6 +11,7 @@
 /* Internal panels are not exposed on the public page. */
 #view-admin { display: none !important; }
 #customerOrders, #clearOrders { display: none !important; }
+.gocus-profile-detail{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}.gocus-profile-detail summary{cursor:pointer;font-weight:700;padding:3px 0}.gocus-profile-detail[open] summary{margin-bottom:10px}.gocus-profile-detail[hidden]{display:none!important}
 </style>
 
 <style id="go-cus-luxury-premium">
@@ -279,7 +280,7 @@ $('rideFare').value=settings.rideFare;$('deliveryFare').value=settings.deliveryF
 </script>
 
 <script type="module">
-import { daftarAkun, loginAkun, logoutAkun, ambilStatusAkun, pantauLogin, pantauStatusAkun } from "./firebase-auth.js";
+import { daftarAkun, loginAkun, logoutAkun, ambilStatusAkun, pantauLogin, pantauStatusAkun, perbaruiProfilSaya } from "./firebase-auth.js";
 
 const backdrop = document.createElement("div");
 backdrop.className = "gocus-auth-backdrop";
@@ -294,10 +295,6 @@ backdrop.innerHTML = `
       <button class="btn secondary" type="button" id="gocusModeRegister">Daftar baru</button>
     </div>
     <div id="gocusAuthFields">
-      <label for="gocusAuthEmail">Email</label>
-      <input id="gocusAuthEmail" type="email" autocomplete="email" placeholder="nama@email.com">
-      <label for="gocusAuthPassword">Kata sandi</label>
-      <input id="gocusAuthPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Minimal 6 karakter">
       <div id="gocusRegisterOnlyFields">
       <label for="gocusAuthName">Nama lengkap (untuk daftar)</label>
       <input id="gocusAuthName" autocomplete="name" placeholder="Nama lengkap">
@@ -316,18 +313,23 @@ backdrop.innerHTML = `
         <small style="display:block;color:var(--muted);margin:6px 0 12px">Foto dikompresi sebelum disimpan. Tidak perlu foto plat atau KTP.</small>
       </div>
       </div>
+      </div>
+      <label for="gocusAuthEmail">Email</label>
+      <input id="gocusAuthEmail" type="email" autocomplete="email" placeholder="nama@email.com">
+      <label for="gocusAuthPassword">Kata sandi</label>
+      <input id="gocusAuthPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Minimal 6 karakter">
     </div>
     <section id="gocusProfilePanel" hidden style="margin-top:16px">
       <div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">
         <img id="gocusProfilePhoto" alt="Foto profil" hidden style="width:88px;height:88px;object-fit:cover;border-radius:50%;border:1px solid var(--line)">
         <div><h3 id="gocusProfileName" style="margin:0 0 4px">Profil GO CUS</h3><p id="gocusProfileRole" style="margin:0;color:var(--muted)"></p><p id="gocusProfileStatus" style="margin:4px 0 0"></p></div>
       </div>
-      <label for="gocusProfilePhone">Nomor HP</label><input id="gocusProfilePhone" inputmode="tel" placeholder="08xxxxxxxxxx">
-      <label for="gocusProfileAddress">Alamat</label><textarea id="gocusProfileAddress" rows="2" placeholder="Alamat tempat tinggal"></textarea>
-      <div id="gocusProfilePlateWrap" hidden><label>Nomor plat kendaraan</label><input id="gocusProfilePlate" readonly></div>
-      <label>Email akun</label><input id="gocusProfileEmail" readonly>
-      <button class="btn primary" type="button" id="gocusProfileSave">Simpan Profil</button>
-      <button class="btn secondary" type="button" id="gocusProfileLogout">Keluar</button>
+      <details class="gocus-profile-detail"><summary>Nomor HP</summary><label for="gocusProfilePhone">Nomor HP</label><input id="gocusProfilePhone" inputmode="tel" placeholder="08xxxxxxxxxx"></details>
+      <details class="gocus-profile-detail"><summary>Alamat</summary><label for="gocusProfileAddress">Alamat</label><textarea id="gocusProfileAddress" rows="2" placeholder="Alamat tempat tinggal"></textarea></details>
+      <details class="gocus-profile-detail" id="gocusProfilePlateWrap" hidden><summary>Kendaraan</summary><label for="gocusProfilePlate">Nomor plat kendaraan</label><input id="gocusProfilePlate" readonly></details>
+      <details class="gocus-profile-detail"><summary>Email akun</summary><label for="gocusProfileEmail">Email akun</label><input id="gocusProfileEmail" readonly></details>
+      <button class="btn primary" type="button" id="gocusProfileSave">Edit / Simpan Profil</button>
+      <button class="btn secondary" type="button" id="gocusProfileLogout">Keluar Akun</button>
     </section>
     <div class="gocus-auth-actions" id="gocusAuthActions">
       <button class="btn primary" type="button" id="gocusLoginBtn">Masuk</button>
