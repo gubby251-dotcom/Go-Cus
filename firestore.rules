@@ -4,59 +4,68 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function signedIn() {
+    function isSignedIn() {
       return request.auth != null;
     }
 
-    function isSelf(uid) {
-      return signedIn() && request.auth.uid == uid;
-    }
-
     function isAdmin() {
-      return signedIn()
+      return isSignedIn()
         && request.auth.token.admin == true;
     }
 
-    function approvedOwner() {
-      return signedIn()
+    function isOwnerApproved(uid) {
+      return isSignedIn()
+        && request.auth.uid == uid
+        && exists(/databases/$(database)/documents/users/$(uid))
+        && get(/databases/$(database)/documents/users/$(uid)).data.role == 'pemilik-warung'
+        && get(/databases/$(database)/documents/users/$(uid)).data.status == 'disetujui';
+    }
+
+    function isCustomerApproved() {
+      return isSignedIn()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'pemilik-warung'
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'pelanggan'
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'disetujui';
     }
 
-    // Profil pengguna: pengguna membaca profil sendiri.
-    // Hanya Admin tepercaya boleh mengubah status/role.
+    // PROFIL PENGGUNA
     match /users/{uid} {
-      allow read: if isSelf(uid) || isAdmin();
-
-      allow create: if isSelf(uid)
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
         && request.resource.data.keys().hasOnly([
           'nama', 'email', 'role', 'status', 'dibuatPada'
         ])
+        && request.resource.data.nama is string
+        && request.resource.data.email == request.auth.token.email
         && request.resource.data.role in [
           'pelanggan', 'pemilik-warung', 'mitra'
         ]
         && request.resource.data.status == 'menunggu-persetujuan';
 
-      allow update: if isSelf(uid)
-        && request.resource.data.role == resource.data.role
-        && request.resource.data.status == resource.data.status
-        && request.resource.data.email == resource.data.email
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['nama']);
+      allow read: if isSignedIn()
+        && (request.auth.uid == uid || isAdmin());
+
+      // Pengguna tidak boleh mengubah sendiri role/status.
+      allow update: if isAdmin()
+        || (
+          isSignedIn()
+          && request.auth.uid == uid
+          && request.resource.data.diff(resource.data)
+            .affectedKeys().hasOnly(['nama'])
+          && request.resource.data.nama is string
+        );
 
       allow delete: if isAdmin();
     }
 
-    // Profil warung: hanya pemilik yang disetujui atau Admin.
+    // PROFIL WARUNG
     match /shops/{shopId} {
       allow read: if resource.data.verified == true
-        || (signedIn() && resource.data.ownerUid == request.auth.uid)
-        || isAdmin();
+        || isAdmin()
+        || (isSignedIn() && request.auth.uid == shopId);
 
-      allow create: if approvedOwner()
-        && shopId == request.auth.uid
-        && request.resource.data.ownerUid == request.auth.uid
+      allow create: if isOwnerApproved(shopId)
+        && request.resource.data.ownerUid == shopId
         && request.resource.data.verified == false
         && request.resource.data.keys().hasOnly([
           'ownerUid', 'namaWarung', 'deskripsi',
@@ -64,65 +73,76 @@ service cloud.firestore {
         ]);
 
       allow update: if isAdmin()
-        || (approvedOwner()
-          && shopId == request.auth.uid
-          && resource.data.ownerUid == request.auth.uid
-          && request.resource.data.ownerUid == resource.data.ownerUid
+        || (
+          isOwnerApproved(shopId)
+          && request.auth.uid == shopId
+          && resource.data.ownerUid == shopId
+          && request.resource.data.ownerUid == shopId
           && request.resource.data.verified == resource.data.verified
-          && request.resource.data.diff(resource.data).affectedKeys()
-            .hasOnly(['namaWarung', 'deskripsi', 'diperbaruiPada']));
+        );
 
       allow delete: if isAdmin();
 
+      // MENU WARUNG
       match /menus/{menuId} {
-        allow read: if get(/databases/$(database)/documents/shops/$(shopId)).data.verified == true
-          || (signedIn() && shopId == request.auth.uid)
-          || isAdmin();
+        allow read: if isAdmin()
+          || (isSignedIn() && request.auth.uid == shopId)
+          || (
+            get(/databases/$(database)/documents/shops/$(shopId)).data.verified == true
+            && resource.data.statusPersetujuan == 'disetujui'
+            && resource.data.tersedia == true
+          );
 
-        allow create: if approvedOwner()
-          && shopId == request.auth.uid
-          && request.resource.data.ownerUid == request.auth.uid
+        allow create: if isOwnerApproved(shopId)
+          && request.auth.uid == shopId
+          && get(/databases/$(database)/documents/shops/$(shopId)).data.verified == true
+          && request.resource.data.ownerUid == shopId
           && request.resource.data.statusPersetujuan == 'menunggu'
-          && request.resource.data.keys().hasOnly([
-            'ownerUid', 'nama', 'harga', 'deskripsi',
-            'tersedia', 'statusPersetujuan',
-            'dibuatPada', 'diperbaruiPada'
-          ]);
+          && request.resource.data.tersedia == true
+          && request.resource.data.harga is number
+          && request.resource.data.harga > 0;
 
         allow update: if isAdmin()
-          || (approvedOwner()
-            && shopId == request.auth.uid
-            && resource.data.ownerUid == request.auth.uid
-            && request.resource.data.ownerUid == resource.data.ownerUid
+          || (
+            isOwnerApproved(shopId)
+            && request.auth.uid == shopId
+            && resource.data.ownerUid == shopId
+            && request.resource.data.ownerUid == shopId
             && request.resource.data.statusPersetujuan == resource.data.statusPersetujuan
-            && request.resource.data.diff(resource.data).affectedKeys()
-              .hasOnly(['nama', 'harga', 'deskripsi', 'tersedia', 'diperbaruiPada']));
+          );
 
-        allow delete: if isAdmin();
+        allow delete: if isAdmin()
+          || (
+            isOwnerApproved(shopId)
+            && request.auth.uid == shopId
+          );
       }
     }
 
-    // Pesanan: pelanggan membuat pesanan untuk dirinya sendiri.
-    // Akses lanjutan untuk driver/Admin perlu ditambahkan setelah
-    // alur penugasan driver dan verifikasi Admin ditentukan.
+    // PESANAN
     match /orders/{orderId} {
-      allow create: if signedIn()
+      allow create: if isCustomerApproved()
         && request.resource.data.customerUid == request.auth.uid
         && request.resource.data.status == 'menunggu'
         && request.resource.data.keys().hasOnly([
           'customerUid', 'detail', 'status', 'dibuatPada'
         ]);
 
-      allow read: if signedIn()
-        && resource.data.customerUid == request.auth.uid
-        || isAdmin();
+      allow read: if isAdmin()
+        || (
+          isSignedIn()
+          && resource.data.customerUid == request.auth.uid
+        )
+        || (
+          isSignedIn()
+          && resource.data.driverUid == request.auth.uid
+        );
 
+      // Status dan penugasan driver harus diatur oleh
+      // alur otorisasi yang terverifikasi, bukan pelanggan.
       allow update, delete: if isAdmin();
     }
 
-    // Semua dokumen lain ditolak secara default.
-    match /{document=**} {
-      allow read, write: if false;
-    }
+    // Semua koleksi lain ditolak secara default.
   }
 }
