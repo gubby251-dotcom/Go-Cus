@@ -418,13 +418,13 @@ $auth("gocusRegisterBtn").addEventListener("click", async () => {
   const email = $auth("gocusAuthEmail").value.trim();
   const password = $auth("gocusAuthPassword").value;
   const role = $auth("gocusAuthRole").value;
-  const nomorPlat = plateInput.value.trim().toUpperCase().replace(/\\s+/g, " ");
+  const nomorPlat = plateInput.value.trim().toUpperCase().replace(/\s+/g, " ");
   if (!nama || !email || password.length < 6) {
     message("Isi nama, email yang valid, dan kata sandi minimal 6 karakter.", true);
     return;
   }
   if (role === "mitra") {
-    if (!nomorPlat || nomorPlat.replace(/\\s/g, "").length < 4 || nomorPlat.length > 12) {
+    if (!nomorPlat || nomorPlat.replace(/\s/g, "").length < 4 || nomorPlat.length > 12) {
       message("Masukkan nomor plat kendaraan asli dengan benar.", true);
       return;
     }
@@ -469,7 +469,10 @@ $auth("gocusLoginBtn").addEventListener("click", async () => {
     } else if (profil.status !== "disetujui") {
       message("Akun berhasil masuk, tetapi masih menunggu persetujuan Admin.");
     } else {
-      message("Login berhasil. Peran: " + profil.role + ". Fitur online akan tersedia setelah integrasi backend selesai.");
+      message("Login berhasil. Akun disetujui. Sesi tersimpan di perangkat ini.");
+      $auth("gocusAuthPassword").value = "";
+      closeModal();
+      window.dispatchEvent(new CustomEvent("gocus:account-approved", { detail: { role: profil.role } }));
     }
   } catch (error) {
     console.error("GO CUS login:", error);
@@ -499,6 +502,7 @@ pantauLogin(user => {
     if (profil.status === "disetujui" && profil.emailTerverifikasi) {
       message("Akun telah disetujui Admin. Sesi tetap aktif; Anda tidak perlu masuk kembali.");
       closeModal();
+      window.dispatchEvent(new CustomEvent("gocus:account-approved", { detail: { role: profil.role } }));
     } else if (profil.status === "disetujui" && !profil.emailTerverifikasi) {
       message("Akun disetujui Admin, tetapi email belum terverifikasi. Verifikasi email terlebih dahulu.");
     } else if (profil.status === "menunggu-persetujuan") {
