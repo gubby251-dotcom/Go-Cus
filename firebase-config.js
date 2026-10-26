@@ -9,7 +9,6 @@ const firebaseConfig = {
   projectId: "go-cus",
   appId: "1:838754374714:web:5b0ebaecbb8d817de75103"
 };
-};
 
 const app = initializeApp(firebaseConfig);
 
