@@ -182,6 +182,20 @@ button:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(.12)}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 </style>
 
+
+<style id="gocus-auth-modal-style">
+.gocus-auth-backdrop{position:fixed;inset:0;z-index:1000;background:rgba(30,18,15,.55);display:none;align-items:center;justify-content:center;padding:16px}
+.gocus-auth-backdrop.open{display:flex}
+.gocus-auth-card{background:var(--white,#fffdf8);color:var(--ink,#281815);border:1px solid var(--line,#e4d3b4);border-radius:22px;padding:22px;width:min(100%,430px);max-height:90dvh;overflow:auto;box-shadow:0 20px 60px #0003}
+.gocus-auth-card h2{margin:0 0 6px;font-size:24px}
+.gocus-auth-card p{color:var(--muted,#79645b);font-size:14px;line-height:1.45}
+.gocus-auth-card label{display:block;font-weight:700;font-size:13px;margin:12px 0 6px}
+.gocus-auth-card input,.gocus-auth-card select{width:100%;border:1px solid var(--line,#e4d3b4);border-radius:12px;padding:12px;background:#fffdf8;color:#281815}
+.gocus-auth-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.gocus-auth-actions button{flex:1;min-width:110px}
+.gocus-auth-message{font-size:13px;line-height:1.4;margin-top:12px;overflow-wrap:anywhere}
+.gocus-auth-close{float:right;border:0;background:transparent;font-size:24px;padding:0 4px}
+</style>
 </head>
 <body>
 <header class="top"><div class="wrap nav">
@@ -240,7 +254,7 @@ $('startBooking').onclick=()=>{$('bookingSection').scrollIntoView({behavior:'smo
 $('quickBook').onclick=()=>{$('bookingSection').scrollIntoView({behavior:'smooth'});$('pickup').focus()};
 $('locationPrompt').onclick=()=>{$('pickup').focus();$('bookingSection').scrollIntoView({behavior:'smooth'});toast('Masukkan lokasi penjemputan di detail pesanan.')};
 $('locationPrompt').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('locationPrompt').click()}};
-document.querySelectorAll('[data-bottom]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-bottom]').forEach(x=>x.classList.toggle('active',x===b));const target=b.dataset.bottom;if(target==='home'){switchView('customer')}else if(target==='orders'){if($('view-driver').classList.contains('active'))$('driverOrders').scrollIntoView({behavior:'smooth'});else{$('bookingSection').scrollIntoView({behavior:'smooth'});toast('Lihat detail dan riwayat pesanan di bawah formulir.')}}else if(target==='chat'){toast('Fitur chat tersedia setelah backend GO CUS diaktifkan.')}else if(target==='account'){toast('Fitur akun sedang disiapkan.')}}));
+document.querySelectorAll('[data-bottom]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-bottom]').forEach(x=>x.classList.toggle('active',x===b));const target=b.dataset.bottom;if(target==='home'){switchView('customer')}else if(target==='orders'){if($('view-driver').classList.contains('active'))$('driverOrders').scrollIntoView({behavior:'smooth'});else{$('bookingSection').scrollIntoView({behavior:'smooth'});toast('Lihat detail dan riwayat pesanan di bawah formulir.')}}else if(target==='chat'){toast('Fitur chat tersedia setelah backend GO CUS diaktifkan.')}else if(target==='account'){window.dispatchEvent(new Event('gocus:account'));}}));
 $('chooseRide').onclick=()=>{$('serviceType').value='Ojek Penumpang';updateEstimate();$('bookingSection').scrollIntoView({behavior:'smooth'})};$('chooseDelivery').onclick=()=>{$('serviceType').value='Antar Barang';updateEstimate();$('bookingSection').scrollIntoView({behavior:'smooth'})};$('serviceType').addEventListener('change',updateEstimate);
 $('bookingForm').addEventListener('submit',e=>{
 e.preventDefault();
@@ -258,5 +272,136 @@ $('saveSettings').onclick=()=>{settings.rideFare=Math.max(0,Number($('rideFare')
 $('exportOrders').onclick=()=>{const rows=[['ID','Jenis','Pemesan','Telepon','Jemput','Tujuan','Tarif','Status','Waktu'],...orders.map(o=>[o.id,o.type,o.name,o.phone,o.pickup,o.destination,o.fare,o.status,o.created])],csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}));a.download='go-cus-pesanan-demo.csv';a.click();URL.revokeObjectURL(a.href)};
 $('rideFare').value=settings.rideFare;$('deliveryFare').value=settings.deliveryFare;$('commissionRate').value=settings.commissionRate;updateEstimate();render();
 })();
+</script>
+
+<script type="module">
+import { daftarAkun, loginAkun, logoutAkun, ambilStatusAkun, pantauLogin } from "./firebase-auth.js";
+
+const backdrop = document.createElement("div");
+backdrop.className = "gocus-auth-backdrop";
+backdrop.id = "gocusAuthBackdrop";
+backdrop.innerHTML = `
+  <section class="gocus-auth-card" role="dialog" aria-modal="true" aria-labelledby="gocusAuthTitle">
+    <button type="button" class="gocus-auth-close" id="gocusAuthClose" aria-label="Tutup">×</button>
+    <h2 id="gocusAuthTitle">Akun GO CUS</h2>
+    <p id="gocusAuthIntro">Masuk atau daftar akun GO CUS. Akun baru menunggu persetujuan.</p>
+    <div id="gocusAuthFields">
+      <label for="gocusAuthName">Nama lengkap (untuk daftar)</label>
+      <input id="gocusAuthName" autocomplete="name" placeholder="Nama lengkap">
+      <label for="gocusAuthEmail">Email</label>
+      <input id="gocusAuthEmail" type="email" autocomplete="email" placeholder="nama@email.com">
+      <label for="gocusAuthPassword">Kata sandi</label>
+      <input id="gocusAuthPassword" type="password" autocomplete="current-password" minlength="6" placeholder="Minimal 6 karakter">
+      <label for="gocusAuthRole">Jenis akun (untuk daftar)</label>
+      <select id="gocusAuthRole">
+        <option value="pelanggan">Pelanggan</option>
+        <option value="pemilik-warung">Pemilik warung</option>
+        <option value="mitra">Mitra</option>
+      </select>
+    </div>
+    <div class="gocus-auth-actions">
+      <button class="btn primary" type="button" id="gocusLoginBtn">Masuk</button>
+      <button class="btn secondary" type="button" id="gocusRegisterBtn">Daftar</button>
+      <button class="btn secondary" type="button" id="gocusLogoutBtn" hidden>Keluar</button>
+    </div>
+    <div class="gocus-auth-message" id="gocusAuthMessage" role="status" aria-live="polite"></div>
+  </section>`;
+document.body.appendChild(backdrop);
+
+const $auth = id => document.getElementById(id);
+const message = (text, error=false) => {
+  const el = $auth("gocusAuthMessage");
+  el.textContent = text;
+  el.style.color = error ? "#9f2727" : "var(--green,#245b48)";
+};
+const openModal = () => { backdrop.classList.add("open"); message(""); };
+const closeModal = () => backdrop.classList.remove("open");
+window.addEventListener("gocus:account", openModal);
+$auth("gocusAuthClose").addEventListener("click", closeModal);
+backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
+
+function authError(error) {
+  const code = error?.code || "";
+  const map = {
+    "auth/email-already-in-use": "Email ini sudah terdaftar. Silakan masuk.",
+    "auth/invalid-email": "Format email tidak valid.",
+    "auth/weak-password": "Kata sandi terlalu lemah. Gunakan minimal 6 karakter.",
+    "auth/invalid-credential": "Email atau kata sandi salah.",
+    "auth/user-not-found": "Akun tidak ditemukan. Silakan daftar terlebih dahulu.",
+    "auth/network-request-failed": "Koneksi internet bermasalah. Coba lagi.",
+    "permission-denied": "Akses Firestore ditolak. Periksa Rules Firebase.",
+    "auth/too-many-requests": "Terlalu banyak percobaan. Coba lagi nanti."
+  };
+  return map[code] || error?.message || "Terjadi kesalahan. Coba lagi.";
+}
+
+$auth("gocusRegisterBtn").addEventListener("click", async () => {
+  const nama = $auth("gocusAuthName").value.trim();
+  const email = $auth("gocusAuthEmail").value.trim();
+  const password = $auth("gocusAuthPassword").value;
+  const role = $auth("gocusAuthRole").value;
+  if (!nama || !email || password.length < 6) {
+    message("Isi nama, email yang valid, dan kata sandi minimal 6 karakter.", true);
+    return;
+  }
+  $auth("gocusRegisterBtn").disabled = true;
+  message("Memproses pendaftaran…");
+  try {
+    await daftarAkun(email, password, nama, role);
+    message("Pendaftaran berhasil. Periksa email untuk verifikasi. Akun Anda menunggu persetujuan Admin.");
+    $auth("gocusAuthName").value = "";
+    $auth("gocusAuthPassword").value = "";
+  } catch (error) {
+    console.error("GO CUS registration:", error);
+    message(authError(error), true);
+  } finally {
+    $auth("gocusRegisterBtn").disabled = false;
+  }
+});
+
+$auth("gocusLoginBtn").addEventListener("click", async () => {
+  const email = $auth("gocusAuthEmail").value.trim();
+  const password = $auth("gocusAuthPassword").value;
+  if (!email || !password) { message("Isi email dan kata sandi.", true); return; }
+  $auth("gocusLoginBtn").disabled = true;
+  message("Memeriksa akun…");
+  try {
+    await loginAkun(email, password);
+    const profil = await ambilStatusAkun();
+    if (!profil.role) {
+      message("Login berhasil, tetapi profil akun belum tersedia. Hubungi pengelola.", true);
+    } else if (!profil.emailTerverifikasi) {
+      message("Login berhasil. Silakan verifikasi email Anda, lalu masuk kembali.");
+    } else if (profil.status !== "disetujui") {
+      message("Akun berhasil masuk, tetapi masih menunggu persetujuan Admin.");
+    } else {
+      message("Login berhasil. Peran: " + profil.role + ". Fitur online akan tersedia setelah integrasi backend selesai.");
+    }
+  } catch (error) {
+    console.error("GO CUS login:", error);
+    message(authError(error), true);
+  } finally {
+    $auth("gocusLoginBtn").disabled = false;
+  }
+});
+
+$auth("gocusLogoutBtn").addEventListener("click", async () => {
+  try { await logoutAkun(); message("Anda sudah keluar."); }
+  catch (error) { message(authError(error), true); }
+});
+
+pantauLogin(async user => {
+  $auth("gocusLogoutBtn").hidden = !user;
+  if (!user) return;
+  try {
+    const profil = await ambilStatusAkun();
+    if (profil.status !== "disetujui") {
+      // Keep account state visible only in the account dialog; no privileged UI is opened.
+      message("Status akun: " + profil.status + ".");
+    }
+  } catch (error) {
+    console.warn("GO CUS account state:", error);
+  }
+});
 </script>
 </body></html>
