@@ -9,7 +9,7 @@
 @media(max-width:560px){.wrap{padding:0 13px}.nav{align-items:center;flex-direction:column;padding:11px 0;gap:11px}.brand{width:100%}.nav-actions{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.navbtn{padding:11px 3px;font-size:12px}.hero{padding-top:13px}.hero-panel{min-height:258px;padding:21px 18px;border-radius:25px;align-items:flex-start}.hero-copy{width:72%}.hero h1{font-size:clamp(33px,8vw,44px);margin:17px 0 11px}.hero p{font-size:14px;line-height:1.45}.hero-row{margin-top:19px}.hero-row .btn{padding:12px 14px;font-size:13px}.hero-art{width:43%;right:-7%;opacity:.95}.scooter-art{font-size:clamp(80px,21vw,124px);transform:translate(5px,10px)}.parcel-art{right:7%;bottom:21%;font-size:38px}.section{padding:14px 0 20px}.section-head{align-items:start}.section-head h2{font-size:21px}.section-head p{font-size:12px}.grid{gap:10px}.service{padding:14px 12px;min-height:184px;border-radius:22px}.service .icon{width:65px;height:65px;font-size:34px;margin-bottom:15px}.service h3{font-size:16px}.service p{font-size:12px}.service .arrow{right:11px;top:11px;width:30px;height:30px}.location-card{padding:12px;gap:10px}.location-icon{width:47px;height:47px}.location-copy strong{font-size:14px}.wide-order{padding:14px 15px;font-size:16px}.benefits{gap:6px}.benefit{padding:9px 7px;gap:7px;flex-direction:column;align-items:flex-start}.benefit-icon{width:35px;height:35px}.benefit strong{font-size:12px}.benefit small{font-size:10px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.cards{grid-template-columns:1fr 1fr}.cards .stat:last-child{grid-column:1/-1}.panel{padding:15px}.toast{bottom:91px}}
 
 /* Internal panels are not exposed on the public page. */
-#view-driver, #view-admin { display: none !important; }
+#view-admin { display: none !important; }
 #customerOrders, #clearOrders { display: none !important; }
 </style>
 
@@ -207,7 +207,7 @@ button:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(.12)}
   <path d="M34 29h16v9H40v8" fill="none" stroke="#fff4df" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   <circle cx="48" cy="49" r="4.2" fill="url(#gGold)"/><circle cx="48" cy="49" r="1.7" fill="#6b211e"/>
 </svg></span><span><strong>GO CUS</strong><small>Pamekasan</small></span></a>
-<nav class="nav-actions" aria-label="Navigasi"><button class="navbtn active" data-view="customer">Pelanggan</button></nav>
+<nav class="nav-actions" aria-label="Navigasi"><button class="navbtn active" id="gocusRoleNav" data-view="customer">Pelanggan</button></nav>
 </div></header>
 <main class="wrap">
 <section class="hero"><div class="hero-panel"><div class="hero-copy">
@@ -230,6 +230,7 @@ button:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(.12)}
 <section class="section"><div class="section-head"><div><h2>Pesanan saya</h2><p>Riwayat pesanan</p></div><button class="btn secondary" id="clearOrders" type="button">Hapus</button></div><div id="customerOrders"></div></section>
 </section>
 <section id="view-driver" class="view"><section class="section"><div class="section-head"><div><h2>Ruang Driver</h2><p>Kelola pesanan.</p></div></div><div class="panel"><div class="order-top"><div><strong>Status mitra</strong><div class="tiny">Aktifkan saat siap menerima order.</div></div><label style="display:flex;align-items:center;gap:8px;font-weight:800"><input type="checkbox" id="driverOnline"> Online</label></div><p class="tiny" id="driverStatusText">Status saat ini: Offline</p></div><div class="cards" style="margin-top:13px"><div class="stat"><small>Order selesai</small><strong id="driverCompleted">0</strong></div><div class="stat"><small>Penghasilan</small><strong id="driverIncome">Rp0</strong></div><div class="stat"><small>Komisi</small><strong id="driverCommission">Rp0</strong></div></div></section><section class="section"><div class="section-head"><div><h2>Daftar pesanan</h2><p>Pesanan.</p></div></div><div id="driverOrders"></div></section></section>
+<section id="view-owner" class="view"><section class="section"><div class="section-head"><div><h2>Dashboard Pemilik Warung</h2><p>Kelola profil dan informasi warung Anda.</p></div></div><div class="panel"><p id="ownerAccessMessage">Akun pemilik warung harus disetujui Admin untuk mengaktifkan fitur operasional.</p></div></section></section>
 <section id="view-admin" class="view"><section class="section"><div class="section-head"><div><h2>Panel Admin</h2><p>Ringkasan operasional.</p></div></div><div class="cards" style="margin-top:14px"><div class="stat"><small>Total pesanan</small><strong id="adminTotal">0</strong></div><div class="stat"><small>Menunggu driver</small><strong id="adminPending">0</strong></div><div class="stat"><small>Komisi</small><strong id="adminCommission">Rp0</strong></div></div></section>
 <section class="section"><div class="section-head"><div><h2>Daftar pesanan</h2><p>Status pesanan.</p></div><button class="btn secondary" id="exportOrders">Unduh CSV</button></div><div class="panel tablewrap" id="adminTable"></div></section>
 <section class="section"><div class="section-head"><div><h2>Pengaturan tarif</h2><p>Pengaturan internal.</p></div></div><div class="panel"><div class="formgrid"><div class="field"><label for="rideFare">Ojek penumpang (Rp)</label><input id="rideFare" type="number" min="0" step="500" value="8000"></div><div class="field"><label for="deliveryFare">Antar barang (Rp)</label><input id="deliveryFare" type="number" min="0" step="500" value="10000"></div><div class="field"><label for="commissionRate">Komisi simulasi (%)</label><input id="commissionRate" type="number" min="0" max="100" step="1" value="10"></div></div><button class="btn primary" id="saveSettings" style="margin-top:13px">Simpan</button></div></section></section>
@@ -246,8 +247,11 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(orders));localStorag
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.add('hidden'),2800)}
 function currentFare(){return $('serviceType').value==='Antar Barang'?Number(settings.deliveryFare):Number(settings.rideFare)}
 function updateEstimate(){$('estimatePrice').textContent=money(currentFare());$('recipientField').classList.toggle('hidden',$('serviceType').value!=='Antar Barang')}
+let gocusRoleAktif = null;
 function switchView(view){
-if(view!=='customer'){toast('Fitur internal belum tersedia untuk akses publik.');view='customer';}
+if(view==='driver' && gocusRoleAktif!=='mitra'){toast('Dashboard Mitra hanya untuk akun Mitra yang disetujui.');view='customer';}
+if(view==='owner' && gocusRoleAktif!=='pemilik-warung'){toast('Dashboard warung hanya untuk pemilik warung yang disetujui.');view='customer';}
+if(view==='admin'){toast('Panel Admin memerlukan otorisasi Admin.');view='customer';}
 document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$('view-'+view).classList.add('active');document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));document.querySelectorAll('[data-bottom]').forEach(b=>b.classList.toggle('active',b.dataset.bottom===(view==='customer'?'home':view==='driver'?'orders':'account')));window.scrollTo({top:0,behavior:'smooth'});render()}
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>switchView(b.dataset.view)));
 $('startBooking').onclick=()=>{$('bookingSection').scrollIntoView({behavior:'smooth'});$('pickup').focus()};
@@ -285,7 +289,12 @@ backdrop.innerHTML = `
     <button type="button" class="gocus-auth-close" id="gocusAuthClose" aria-label="Tutup">×</button>
     <h2 id="gocusAuthTitle">Akun GO CUS</h2>
     <p id="gocusAuthIntro">Masuk atau daftar akun GO CUS. Akun baru menunggu persetujuan.</p>
+    <div class="gocus-auth-actions" id="gocusAuthModeActions" style="margin-bottom:12px">
+      <button class="btn primary" type="button" id="gocusModeLogin">Masuk</button>
+      <button class="btn secondary" type="button" id="gocusModeRegister">Daftar baru</button>
+    </div>
     <div id="gocusAuthFields">
+      <div id="gocusRegisterOnlyFields">
       <label for="gocusAuthName">Nama lengkap (untuk daftar)</label>
       <input id="gocusAuthName" autocomplete="name" placeholder="Nama lengkap">
       <label for="gocusAuthEmail">Email</label>
@@ -306,8 +315,21 @@ backdrop.innerHTML = `
         <img id="gocusMitraPhotoPreview" alt="Pratinjau foto profil mitra" hidden style="width:100px;height:100px;object-fit:cover;border-radius:50%;margin-top:8px;border:1px solid var(--line)">
         <small style="display:block;color:var(--muted);margin:6px 0 12px">Foto dikompresi sebelum disimpan. Tidak perlu foto plat atau KTP.</small>
       </div>
+      </div>
     </div>
-    <div class="gocus-auth-actions">
+    <section id="gocusProfilePanel" hidden style="margin-top:16px">
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:16px">
+        <img id="gocusProfilePhoto" alt="Foto profil" hidden style="width:88px;height:88px;object-fit:cover;border-radius:50%;border:1px solid var(--line)">
+        <div><h3 id="gocusProfileName" style="margin:0 0 4px">Profil GO CUS</h3><p id="gocusProfileRole" style="margin:0;color:var(--muted)"></p><p id="gocusProfileStatus" style="margin:4px 0 0"></p></div>
+      </div>
+      <label for="gocusProfilePhone">Nomor HP</label><input id="gocusProfilePhone" inputmode="tel" placeholder="08xxxxxxxxxx">
+      <label for="gocusProfileAddress">Alamat</label><textarea id="gocusProfileAddress" rows="2" placeholder="Alamat tempat tinggal"></textarea>
+      <div id="gocusProfilePlateWrap" hidden><label>Nomor plat kendaraan</label><input id="gocusProfilePlate" readonly></div>
+      <label>Email akun</label><input id="gocusProfileEmail" readonly>
+      <button class="btn primary" type="button" id="gocusProfileSave">Simpan Profil</button>
+      <button class="btn secondary" type="button" id="gocusProfileLogout">Keluar</button>
+    </section>
+    <div class="gocus-auth-actions" id="gocusAuthActions">
       <button class="btn primary" type="button" id="gocusLoginBtn">Masuk</button>
       <button class="btn secondary" type="button" id="gocusRegisterBtn">Daftar</button>
       <button class="btn secondary" type="button" id="gocusLogoutBtn" hidden>Keluar</button>
@@ -317,14 +339,81 @@ backdrop.innerHTML = `
 document.body.appendChild(backdrop);
 
 const $auth = id => document.getElementById(id);
+let modeAkun = "login";
+function setModeAkun(mode) {
+  modeAkun = mode;
+  const register = mode === "register";
+  $auth("gocusRegisterOnlyFields").hidden = !register;
+  $auth("gocusAuthIntro").textContent = register
+    ? "Isi data untuk membuat akun baru. Akun menunggu persetujuan Admin."
+    : "Masuk dengan email dan kata sandi akun yang sudah terdaftar.";
+  $auth("gocusLoginBtn").hidden = register;
+  $auth("gocusRegisterBtn").hidden = !register;
+  $auth("gocusModeLogin").className = register ? "btn secondary" : "btn primary";
+  $auth("gocusModeRegister").className = register ? "btn primary" : "btn secondary";
+  roleSelect?.dispatchEvent(new Event("change"));
+}
+$auth("gocusModeLogin").addEventListener("click", () => setModeAkun("login"));
+$auth("gocusModeRegister").addEventListener("click", () => setModeAkun("register"));
 const message = (text, error=false) => {
   const el = $auth("gocusAuthMessage");
   el.textContent = text;
   el.style.color = error ? "#9f2727" : "var(--green,#245b48)";
 };
-const openModal = () => { backdrop.classList.add("open"); message(""); };
+const openModal = () => { backdrop.classList.add("open"); message(""); setModeAkun("login"); $auth("gocusProfilePanel").hidden = true; $auth("gocusAuthFields").hidden = false; $auth("gocusAuthActions").hidden = false; $auth("gocusAuthModeActions").hidden = false; };
 const closeModal = () => backdrop.classList.remove("open");
-window.addEventListener("gocus:account", openModal);
+window.addEventListener("gocus:account", async () => {
+  openModal();
+  try {
+    const profil = await ambilStatusAkun();
+    if (profil.role && profil.status === "disetujui" && profil.emailTerverifikasi) tampilkanProfilAkun(profil);
+  } catch (_) {}
+});
+function tampilkanProfilAkun(profil) {
+  $auth("gocusAuthFields").hidden = true;
+  $auth("gocusAuthActions").hidden = true;
+  $auth("gocusAuthModeActions").hidden = true;
+  $auth("gocusProfilePanel").hidden = false;
+  $auth("gocusProfileName").textContent = profil.nama || "Profil GO CUS";
+  $auth("gocusProfileRole").textContent = profil.role === "mitra" ? "Mitra GO CUS" : profil.role === "pemilik-warung" ? "Pemilik Warung GO CUS" : "Pelanggan GO CUS";
+  $auth("gocusProfileStatus").textContent = "Status: " + (profil.status || "belum diketahui");
+  $auth("gocusProfilePhone").value = profil.nomorHp || "";
+  $auth("gocusProfileAddress").value = profil.alamat || "";
+  $auth("gocusProfileEmail").value = profil.email || "";
+  $auth("gocusProfilePlateWrap").hidden = profil.role !== "mitra";
+  $auth("gocusProfilePlate").value = profil.nomorPlat || "";
+  if (profil.fotoProfil && profil.fotoProfil.startsWith("data:image/")) {
+    $auth("gocusProfilePhoto").src = profil.fotoProfil;
+    $auth("gocusProfilePhoto").hidden = false;
+  } else $auth("gocusProfilePhoto").hidden = true;
+}
+$auth("gocusProfileLogout").addEventListener("click", async () => {
+  try {
+    await logoutAkun();
+    $auth("gocusAuthFields").hidden = false;
+    $auth("gocusAuthActions").hidden = false;
+    $auth("gocusAuthModeActions").hidden = false;
+    $auth("gocusProfilePanel").hidden = true;
+    setModeAkun("login");
+    gocusRoleAktif = null;
+    const nav = document.getElementById("gocusRoleNav");
+    if (nav) { nav.textContent = "Pelanggan"; nav.dataset.view = "customer"; }
+    switchView("customer");
+    message("Anda sudah keluar.");
+  } catch (error) { message(authError(error), true); }
+});
+$auth("gocusProfileSave").addEventListener("click", async () => {
+  const btn = $auth("gocusProfileSave"); btn.disabled = true;
+  try {
+    const profil = await perbaruiProfilSaya({
+      nama: $auth("gocusProfileName").textContent,
+      nomorHp: $auth("gocusProfilePhone").value,
+      alamat: $auth("gocusProfileAddress").value
+    });
+    tampilkanProfilAkun(profil); message("Profil berhasil disimpan.");
+  } catch (error) { message(authError(error), true); }
+  finally { btn.disabled = false; }
+});
 $auth("gocusAuthClose").addEventListener("click", closeModal);
 backdrop.addEventListener("click", e => { if (e.target === backdrop) closeModal(); });
 
@@ -340,6 +429,7 @@ roleSelect.addEventListener("change", () => {
   plateInput.required = roleSelect.value === "mitra";
   photoInput.required = roleSelect.value === "mitra";
 });
+setModeAkun("login");
 
 function compressMitraPhoto(file) {
   return new Promise((resolve, reject) => {
@@ -472,7 +562,12 @@ $auth("gocusLoginBtn").addEventListener("click", async () => {
       message("Login berhasil. Akun disetujui. Sesi tersimpan di perangkat ini.");
       $auth("gocusAuthPassword").value = "";
       closeModal();
-      window.dispatchEvent(new CustomEvent("gocus:account-approved", { detail: { role: profil.role } }));
+      gocusRoleAktif = profil.role;
+  const nav = document.getElementById("gocusRoleNav");
+  if (nav) { nav.textContent = profil.role === "mitra" ? "Mitra" : profil.role === "pemilik-warung" ? "Pemilik Warung" : "Pelanggan"; nav.dataset.view = profil.role === "mitra" ? "driver" : profil.role === "pemilik-warung" ? "owner" : "customer"; }
+  switchView(profil.role === "mitra" ? "driver" : profil.role === "pemilik-warung" ? "owner" : "customer");
+  tampilkanProfilAkun(profil);
+  window.dispatchEvent(new CustomEvent("gocus:account-approved", { detail: { role: profil.role } }));
     }
   } catch (error) {
     console.error("GO CUS login:", error);
@@ -502,7 +597,12 @@ pantauLogin(user => {
     if (profil.status === "disetujui" && profil.emailTerverifikasi) {
       message("Akun telah disetujui Admin. Sesi tetap aktif; Anda tidak perlu masuk kembali.");
       closeModal();
-      window.dispatchEvent(new CustomEvent("gocus:account-approved", { detail: { role: profil.role } }));
+      gocusRoleAktif = profil.role;
+  const nav = document.getElementById("gocusRoleNav");
+  if (nav) { nav.textContent = profil.role === "mitra" ? "Mitra" : profil.role === "pemilik-warung" ? "Pemilik Warung" : "Pelanggan"; nav.dataset.view = profil.role === "mitra" ? "driver" : profil.role === "pemilik-warung" ? "owner" : "customer"; }
+  switchView(profil.role === "mitra" ? "driver" : profil.role === "pemilik-warung" ? "owner" : "customer");
+  tampilkanProfilAkun(profil);
+  window.dispatchEvent(new CustomEvent("gocus:account-approved", { detail: { role: profil.role } }));
     } else if (profil.status === "disetujui" && !profil.emailTerverifikasi) {
       message("Akun disetujui Admin, tetapi email belum terverifikasi. Verifikasi email terlebih dahulu.");
     } else if (profil.status === "menunggu-persetujuan") {
