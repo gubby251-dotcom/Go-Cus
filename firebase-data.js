@@ -1,5 +1,5 @@
 
-import { db, auth } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 
 import {
   doc,
@@ -19,32 +19,12 @@ function penggunaAktif() {
   return auth.currentUser;
 }
 
-async function ambilProfilTerverifikasi(uid) {
-  const snapshot = await getDoc(doc(db, "users", uid));
-
-  if (!snapshot.exists()) {
-    throw new Error("Profil akun belum tersedia.");
-  }
-
-  const profil = snapshot.data();
-
-  if (
-    profil.role !== "pemilik-warung" ||
-    profil.status !== "disetujui"
-  ) {
-    throw new Error("Akun pemilik warung belum disetujui.");
-  }
-
-  return profil;
-}
-
-// Membaca profil pengguna sendiri.
 export async function ambilProfilSaya() {
   const user = penggunaAktif();
   const snapshot = await getDoc(doc(db, "users", user.uid));
 
   if (!snapshot.exists()) {
-    throw new Error("Profil belum tersedia.");
+    throw new Error("Profil akun belum tersedia.");
   }
 
   return {
@@ -53,53 +33,66 @@ export async function ambilProfilSaya() {
   };
 }
 
-// Membuat atau memperbarui profil warung milik sendiri.
+async function pastikanPeranDisetujui(peran) {
+  const profil = await ambilProfilSaya();
+
+  if (profil.role !== peran || profil.status !== "disetujui") {
+    throw new Error("Akun belum disetujui untuk fitur ini.");
+  }
+
+  return profil;
+}
+
 export async function simpanProfilWarung(data) {
   const user = penggunaAktif();
 
-  await ambilProfilTerverifikasi(user.uid);
+  await pastikanPeranDisetujui("pemilik-warung");
 
-  const namaWarung = String(data.namaWarung || "").trim();
-  const deskripsi = String(data.deskripsi || "").trim();
+  const namaWarung = String(data?.namaWarung || "").trim();
+  const deskripsi = String(data?.deskripsi || "").trim();
 
   if (!namaWarung) {
     throw new Error("Nama warung wajib diisi.");
   }
 
   const shopRef = doc(db, "shops", user.uid);
-  const shopSnapshot = await getDoc(shopRef);
+  const snapshot = await getDoc(shopRef);
 
-  const profilWarung = {
-    ownerUid: user.uid,
+  if (!snapshot.exists()) {
+    await setDoc(shopRef, {
+      ownerUid: user.uid,
+      namaWarung,
+      deskripsi,
+      verified: false,
+      dibuatPada: serverTimestamp(),
+      diperbaruiPada: serverTimestamp()
+    });
+
+    return;
+  }
+
+  await setDoc(shopRef, {
     namaWarung,
     deskripsi,
     diperbaruiPada: serverTimestamp()
-  };
-
-  if (!shopSnapshot.exists()) {
-    profilWarung.verified = false;
-    profilWarung.dibuatPada = serverTimestamp();
-  }
-
-  await setDoc(shopRef, profilWarung, { merge: true });
+  }, { merge: true });
 }
 
-// Menambahkan menu baru. Menu menunggu persetujuan Admin.
 export async function tambahMenu(data) {
   const user = penggunaAktif();
 
-  await ambilProfilTerverifikasi(user.uid);
+  await pastikanPeranDisetujui("pemilik-warung");
 
-  const nama = String(data.nama || "").trim();
-  const harga = Number(data.harga);
-  const deskripsi = String(data.deskripsi || "").trim();
+  const nama = String(data?.nama || "").trim();
+  const deskripsi = String(data?.deskripsi || "").trim();
+  const harga = Number(data?.harga);
 
   if (!nama) {
     throw new Error("Nama menu wajib diisi.");
   }
 
   if (!Number.isFinite(harga) || harga <= 0) {
-    throw new Error("Harga harus berupa angka lebih dari nol.");
+    throw new Error("Harga harus lebih dari nol.");
   }
 
   const shopSnapshot = await getDoc(doc(db, "shops", user.uid));
@@ -112,26 +105,22 @@ export async function tambahMenu(data) {
     throw new Error("Warung belum diverifikasi Admin.");
   }
 
-  return await addDoc(
-    collection(db, "shops", user.uid, "menus"),
-    {
-      ownerUid: user.uid,
-      nama,
-      harga,
-      deskripsi,
-      tersedia: true,
-      statusPersetujuan: "menunggu",
-      dibuatPada: serverTimestamp(),
-      diperbaruiPada: serverTimestamp()
-    }
-  );
+  return addDoc(collection(db, "shops", user.uid, "menus"), {
+    ownerUid: user.uid,
+    nama,
+    deskripsi,
+    harga,
+    tersedia: true,
+    statusPersetujuan: "menunggu",
+    dibuatPada: serverTimestamp(),
+    diperbaruiPada: serverTimestamp()
+  });
 }
 
-// Membaca menu warung sendiri.
 export async function ambilMenuWarungSaya() {
   const user = penggunaAktif();
 
-  await ambilProfilTerverifikasi(user.uid);
+  await pastikanPeranDisetujui("pemilik-warung");
 
   const snapshot = await getDocs(
     collection(db, "shops", user.uid, "menus")
@@ -143,28 +132,22 @@ export async function ambilMenuWarungSaya() {
   }));
 }
 
-// Membuat pesanan dasar untuk pelanggan yang login.
+/*
+ * Fungsi ini belum menjadi sistem checkout produksi.
+ * Validasi harga, stok, ongkir, saldo, dan total wajib dilakukan
+ * kembali di backend sebelum transaksi nyata diaktifkan.
+ */
 export async function buatPesanan(data) {
   const user = penggunaAktif();
 
-  const profilSnapshot = await getDoc(doc(db, "users", user.uid));
-
-  if (
-    !profilSnapshot.exists() ||
-    profilSnapshot.data().role !== "pelanggan" ||
-    profilSnapshot.data().status !== "disetujui"
-  ) {
-    throw new Error("Akun pelanggan belum disetujui.");
-  }
+  await pastikanPeranDisetujui("pelanggan");
 
   if (!data || typeof data !== "object" || Array.isArray(data)) {
     throw new Error("Data pesanan tidak valid.");
   }
 
-  return await addDoc(collection(db, "orders"), {
-    customerUid: user.uid,
-    detail: data,
-    status: "menunggu",
-    dibuatPada: serverTimestamp()
-  });
+  throw new Error(
+    "Checkout belum diaktifkan. Hubungkan ke backend pesanan " +
+    "setelah validasi harga dan pembayaran tersedia."
+  );
 }
