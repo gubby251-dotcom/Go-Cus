@@ -34,13 +34,31 @@ service cloud.firestore {
     match /users/{uid} {
       allow create: if akunSaya(uid)
         && request.resource.data.keys().hasOnly([
+          'nama', 'email', 'role', 'status', 'dibuatPada',
+          'nomorPlat', 'fotoProfil'
+        ])
+        && request.resource.data.keys().hasAll([
           'nama', 'email', 'role', 'status', 'dibuatPada'
         ])
+        && request.resource.data.nama is string
+        && request.resource.data.nama.size() > 0
+        && request.resource.data.email == request.auth.token.email
         && request.resource.data.role in [
           'pelanggan', 'pemilik-warung', 'mitra'
         ]
         && request.resource.data.status == 'menunggu-persetujuan'
-        && request.resource.data.email == request.auth.token.email;
+        && (
+          request.resource.data.role != 'mitra'
+          || (
+            request.resource.data.keys().hasAll(['nomorPlat', 'fotoProfil'])
+            && request.resource.data.nomorPlat is string
+            && request.resource.data.nomorPlat.size() >= 4
+            && request.resource.data.nomorPlat.size() <= 12
+            && request.resource.data.fotoProfil is string
+            && request.resource.data.fotoProfil.size() <= 400000
+            && request.resource.data.fotoProfil.matches('^data:image/jpeg;base64,[A-Za-z0-9+/=]+$')
+          )
+        );
 
       allow read: if akunSaya(uid) || admin();
 
