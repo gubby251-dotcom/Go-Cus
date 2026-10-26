@@ -4,7 +4,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
-  sendEmailVerification
+  sendEmailVerification,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
 import { auth, db } from "./firebase-config.js";
@@ -24,6 +26,12 @@ const ROLE_PUBLIK = [
 ];
 
 const STATUS_MENUNGGU = "menunggu-persetujuan";
+
+// Pertahankan sesi login di browser/perangkat ini setelah halaman ditutup.
+// Pengguna tetap harus login kembali jika memilih Keluar atau sesi dihapus.
+async function pastikanSesiTersimpan() {
+  await setPersistence(auth, browserLocalPersistence);
+}
 
 export async function daftarAkun(email, password, nama, jenisAkun, dataMitra = null) {
   const emailBersih = String(email || "").trim();
@@ -55,6 +63,8 @@ export async function daftarAkun(email, password, nama, jenisAkun, dataMitra = n
       throw new Error("Foto profil mitra wajib berupa gambar terkompresi.");
     }
   }
+
+  await pastikanSesiTersimpan();
 
   const kredensial = await createUserWithEmailAndPassword(
     auth,
@@ -93,6 +103,8 @@ export async function daftarAkun(email, password, nama, jenisAkun, dataMitra = n
 }
 
 export async function loginAkun(email, password) {
+  await pastikanSesiTersimpan();
+
   const kredensial = await signInWithEmailAndPassword(
     auth,
     String(email || "").trim(),
