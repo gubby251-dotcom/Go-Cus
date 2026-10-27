@@ -12,6 +12,8 @@
 #view-admin { display: none !important; }
 #customerOrders, #clearOrders { display: none !important; }
 .gocus-profile-detail{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}.gocus-profile-detail summary{cursor:pointer;font-weight:700;padding:3px 0}.gocus-profile-detail[open] summary{margin-bottom:10px}.gocus-profile-detail[hidden]{display:none!important}
+
+[hidden]{display:none!important}
 </style>
 
 <style id="go-cus-luxury-premium">
@@ -208,7 +210,10 @@ button:disabled{opacity:.48;cursor:not-allowed;filter:grayscale(.12)}
   <path d="M34 29h16v9H40v8" fill="none" stroke="#fff4df" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   <circle cx="48" cy="49" r="4.2" fill="url(#gGold)"/><circle cx="48" cy="49" r="1.7" fill="#6b211e"/>
 </svg></span><span><strong>GO CUS</strong><small>Pamekasan</small></span></a>
-<nav class="nav-actions" aria-label="Navigasi"><button class="navbtn active" id="gocusRoleNav" data-view="customer">Pelanggan</button></nav>
+<nav class="nav-actions" aria-label="Navigasi">
+<button class="navbtn active" id="gocusRoleNav" data-view="customer">Pelanggan</button>
+<button class="navbtn" id="gocusOwnerManageNav" data-view="owner" hidden>Kelola Warung</button>
+</nav>
 </div></header>
 <main class="wrap">
 <section class="hero"><div class="hero-panel"><div class="hero-copy">
@@ -257,14 +262,18 @@ document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));$('v
 function terapkanPeranAkun(profil) {
   if (!profil || profil.status !== 'disetujui' || !profil.emailTerverifikasi) return false;
   const role = profil.role;
-  const view = role === 'mitra' ? 'driver' : role === 'pemilik-warung' ? 'owner' : role === 'pelanggan' ? 'customer' : null;
-  if (!view) return false;
+  // Pemilik warung juga dapat memakai layanan pelanggan. Buka Beranda & Pesan
+  // secara default dan sediakan tombol terpisah untuk pengelolaan warung.
+  const view = role === 'mitra' ? 'driver' : 'customer';
+  if (!['mitra', 'pemilik-warung', 'pelanggan'].includes(role)) return false;
   gocusRoleAktif = role;
   const nav = document.getElementById('gocusRoleNav');
+  const ownerNav = document.getElementById('gocusOwnerManageNav');
   if (nav) {
-    nav.textContent = role === 'mitra' ? 'Mitra' : role === 'pemilik-warung' ? 'Pemilik Warung' : 'Pelanggan';
+    nav.textContent = role === 'mitra' ? 'Mitra' : role === 'pemilik-warung' ? 'Beranda & Pesan' : 'Pelanggan';
     nav.dataset.view = view;
   }
+  if (ownerNav) ownerNav.hidden = role !== 'pemilik-warung';
   switchView(view);
   return true;
 }
@@ -375,7 +384,27 @@ const message = (text, error=false) => {
   el.textContent = text;
   el.style.color = error ? "#9f2727" : "var(--green,#245b48)";
 };
-const openModal = () => { backdrop.classList.add("open"); message(""); setModeAkun("login"); $auth("gocusProfilePanel").hidden = true; $auth("gocusAuthFields").hidden = false; $auth("gocusAuthActions").hidden = false; $auth("gocusAuthModeActions").hidden = false; };
+let gocusSesiUser = null;
+const tampilkanFormLogin = () => {
+  setModeAkun("login");
+  $auth("gocusProfilePanel").hidden = true;
+  $auth("gocusAuthFields").hidden = false;
+  $auth("gocusAuthActions").hidden = false;
+  $auth("gocusAuthModeActions").hidden = false;
+};
+const openModal = () => {
+  backdrop.classList.add("open");
+  message("");
+  // Jangan tampilkan form login sekejap jika sesi Firebase masih aktif.
+  if (gocusSesiUser) {
+    $auth("gocusAuthFields").hidden = true;
+    $auth("gocusAuthActions").hidden = true;
+    $auth("gocusAuthModeActions").hidden = true;
+    $auth("gocusProfilePanel").hidden = true;
+  } else {
+    tampilkanFormLogin();
+  }
+};
 const closeModal = () => backdrop.classList.remove("open");
 window.addEventListener("gocus:account", async () => {
   openModal();
@@ -385,12 +414,15 @@ window.addEventListener("gocus:account", async () => {
       terapkanPeranAkun(profil);
       tampilkanProfilAkun(profil);
     } else {
-      $auth("gocusAuthFields").hidden = false;
-      $auth("gocusAuthActions").hidden = false;
-      $auth("gocusAuthModeActions").hidden = false;
-      $auth("gocusProfilePanel").hidden = true;
+      tampilkanFormLogin();
+      message(profil.status === "menunggu-persetujuan"
+        ? "Akun masih menunggu persetujuan Admin."
+        : "Silakan masuk atau periksa status verifikasi email.");
     }
-  } catch (_) {}
+  } catch (error) {
+    tampilkanFormLogin();
+    if (gocusSesiUser) message("Sesi ditemukan, tetapi profil belum dapat dibaca dari Firebase. Periksa koneksi dan Firestore Rules.", true);
+  }
 });
 let modeEditProfil = false;
 function setModeEditProfil(aktif) {
@@ -428,7 +460,9 @@ $auth("gocusProfileLogout").addEventListener("click", async () => {
     setModeAkun("login");
     gocusRoleAktif = null;
     const nav = document.getElementById("gocusRoleNav");
+    const ownerNav = document.getElementById("gocusOwnerManageNav");
     if (nav) { nav.textContent = "Pelanggan"; nav.dataset.view = "customer"; }
+    if (ownerNav) ownerNav.hidden = true;
     switchView("customer");
     message("Anda sudah keluar.");
   } catch (error) { message(authError(error), true); }
@@ -614,7 +648,13 @@ $auth("gocusLogoutBtn").addEventListener("click", async () => {
 
 let hentikanPantauanStatus = null;
 pantauLogin(user => {
+  gocusSesiUser = user || null;
   $auth("gocusLogoutBtn").hidden = !user;
+  if (!user) {
+    gocusRoleAktif = null;
+    const ownerNav = document.getElementById("gocusOwnerManageNav");
+    if (ownerNav) ownerNav.hidden = true;
+  }
   if (hentikanPantauanStatus) {
     hentikanPantauanStatus();
     hentikanPantauanStatus = null;
