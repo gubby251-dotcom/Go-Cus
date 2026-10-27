@@ -420,8 +420,21 @@ window.addEventListener("gocus:account", async () => {
         : "Silakan masuk atau periksa status verifikasi email.");
     }
   } catch (error) {
-    tampilkanFormLogin();
-    if (gocusSesiUser) message("Sesi ditemukan, tetapi profil belum dapat dibaca dari Firebase. Periksa koneksi dan Firestore Rules.", true);
+    console.error("GO CUS: gagal membaca profil saat membuka Akun:", error);
+    if (gocusSesiUser) {
+      // Sesi Firebase masih aktif: jangan munculkan formulir login/daftar.
+      $auth("gocusAuthFields").hidden = true;
+      $auth("gocusAuthActions").hidden = true;
+      $auth("gocusAuthModeActions").hidden = true;
+      $auth("gocusProfilePanel").hidden = true;
+      const detail = error?.code === "permission-denied"
+        ? "Firebase menolak pembacaan profil (permission-denied). Publikasikan Firestore Rules yang disertakan dalam ZIP ke proyek go-cus."
+        : "Sesi Firebase aktif, tetapi profil gagal dibaca. Periksa koneksi internet dan detail error Firebase.";
+      message(detail, true);
+    } else {
+      tampilkanFormLogin();
+      message(authError(error), true);
+    }
   }
 });
 let modeEditProfil = false;
@@ -678,7 +691,16 @@ pantauLogin(user => {
       message("Akun login, tetapi profil belum tersedia. Hubungi pengelola.", true);
     }
   }, error => {
-    console.warn("GO CUS account status listener:", error);
+    console.error("GO CUS account status listener:", error);
+    if (gocusSesiUser) {
+      $auth("gocusAuthFields").hidden = true;
+      $auth("gocusAuthActions").hidden = true;
+      $auth("gocusAuthModeActions").hidden = true;
+      $auth("gocusProfilePanel").hidden = true;
+      message(error?.code === "permission-denied"
+        ? "Firebase menolak akses profil. Publikasikan Firestore Rules terbaru pada proyek go-cus, lalu muat ulang aplikasi."
+        : "Sesi masih ada, tetapi status profil gagal dimuat. Periksa koneksi lalu muat ulang aplikasi.", true);
+    }
   });
 });
 </script>
